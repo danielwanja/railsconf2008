@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>HTMLFileBrowser</title>
+
+<style type="text/css">
+/*margin and padding on body element
+  can introduce errors in determining
+  element position and are not recommended;
+  we turn them off as a foundation for YUI
+  CSS treatments. */
+body {
+	margin:0;
+	padding:0;
+}
+</style>
+<script src="AIRAliases.js" />
+<script src="prototype.js" />
+
+<link rel="stylesheet" type="text/css" href="ylib/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="ylib/treeview/assets/skins/sam/treeview.css" />
+<script type="text/javascript" src="ylib/yahoo/yahoo-min.js"></script>
+<script type="text/javascript" src="ylib/event/event-min.js"></script>
+<script type="text/javascript" src="ylib/treeview/treeview-min.js"></script>
+
+
+<style>
+#treeDiv1 {background: #fff; margin-top:1em; padding:1em; min-height:7em; }
+</style>
+
+</head>
+
+<body class=" yui-skin-sam">
+
+<h1>File Browser</h1>
+<input type="Button" value="Desktop"    onclick="controller.selectRootFolder(air.File.desktopDirectory)" />
+<input type="Button" value="Documents"  onclick="controller.selectRootFolder(air.File.documentsDirectory)" />
+<input type="Button" value="User"       onclick="controller.selectRootFolder(air.File.userDirectory)" />
+<br/>
+<input type="text" id="path" style="width:100%"></input>  
+<div>
+  <div id="treeDiv"  style="float:left;padding: 5px;" ></div>
+  <div id="details" style="float:left; padding: 5px; maring:10px; background-color: #ccc; border: 1px solid #999"  ></div>    
+<br/>
+<script type="text/javascript">
+
+function init() {
+  controller.buildTree();
+}
+
+FileBrowserController = function() {
+  this.tree = null;
+}
+
+FileBrowserController.prototype.loadNodeData = function(node, fnLoadComplete)  {
+  this.selectFolder(node.data, node);
+  fnLoadComplete();
+}
+
+FileBrowserController.prototype.labelClicked = function(node) {
+  var attributes = ['name', 'extension', 'type', 'size', 'modificationDate', 'creationDate' ];
+  var file = node.data;
+  var description = "";
+  for (var i=0; i<attributes.length; i++)
+     description += attributes[i]+": "+file[attributes[i]]+"<br/>";
+  $('details').innerHTML = description;
+} 
+
+FileBrowserController.prototype.buildTree = function() {
+  this.selectRootFolder(air.File.documentsDirectory);         
+}
+
+FileBrowserController.prototype.selectRootFolder = function(folder) {
+  $("path").value = folder.nativePath;
+  this.tree = new YAHOO.widget.TreeView("treeDiv");
+  this.tree.setDynamicLoad(this.loadNodeData.bind(this), 0);
+  this.tree.subscribe("labelClick", this.labelClicked);
+//  this.tree.removeChildren(this.tree.getRoot());
+  this.selectFolder(folder, this.tree.getRoot());         
+  this.tree.draw(); 
+}
+        
+FileBrowserController.prototype.selectFolder = function(folder, root) {
+  var files = folder.getDirectoryListing();          
+  for (var i = 0; i < files.length; i++) {
+      var tempNode = new YAHOO.widget.TextNode(files[i].name, root, false);
+      tempNode.data = files[i];
+      tempNode.isLeaf = !files[i].isDirectory
+      if (tempNode.isLeaf) tempNode.setDynamicLoad(this.loadNodeData);      
+  }
+}
+
+
+var controller = new FileBrowserController();
+//once the DOM has loaded, we can go ahead and set up our tree:
+YAHOO.util.Event.onDOMReady(init, this, true)
+
+</script>
+
+
+</body>
+</html>

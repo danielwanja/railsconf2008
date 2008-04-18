@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+	Demonstrates System Integration
+	 NativeApplication.nativeApplication.icon.menu
+	 
+-->
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
+	applicationComplete="setup()">
+	<mx:states>
+		<mx:State name="accountSelected">
+			<mx:RemoveChild target="{accountSelectionBox}"/>
+			<mx:AddChild relativeTo="{html}" position="before">
+				<mx:LinkButton label="Select Account" click="currentState=''"/>
+			</mx:AddChild>
+			<mx:SetProperty target="{html}" name="location" value="http://{account}.campfirenow.com"/>
+		</mx:State>
+	</mx:states>
+<mx:Script>
+	<![CDATA[
+		import flash.utils.clearInterval;
+		import flash.utils.setInterval;
+		import flash.desktop.NativeApplication;
+		import air.net.ServiceMonitor;
+	
+		[Bindable]
+		private var account:String=null;
+	
+		private var lastMessageId:String="not-a-message";
+		
+		private var intervalId:Number=-1;
+		private function addInterval():void {
+			if (intervalId==-1)
+				intervalId = setInterval(checkMessages, 5*1000);			
+		}
+		private function removeInterval():void {
+			if (intervalId!=-1) {
+			   clearInterval(intervalId)
+			   intervalId = -1;
+			}
+		}
+		
+		//FIXME: s ee if we can set an html event to trap when the body of a table changes.	
+		private function checkMessages():void {
+			if (currentState!='accountSelected') return;
+			try { // We may not be in a campfire room.			
+			  var messages:Array = html.domWindow.$$('tbody#chat > tr'); 
+			} catch (err:Error) {
+			  return;
+			}
+
+			
+			var currentMessage:Object = messages!= null && messages.length>0 ? messages[messages.length-1] : null;
+			var currentMessageId:String = currentMessage ? currentMessage.id : 'no message' 
+			if (lastMessageId!=	currentMessageId) {
+				lastMessageId = currentMessageId;
+				dispatchNewMessageDetected();
+			}		
+		}
+		
+		private function dispatchNewMessageDetected():void {
+			trace("Messages:"+(lastMessageId ));	
+			if (NativeApplication.supportsDockIcon){		
+				trace("Let's bounce");	
+				var dockicon:DockIcon = NativeApplication.nativeApplication.icon as DockIcon;
+				dockicon.bounce("informational"); //Note, only bounces if application is not active.
+			}				
+		}
+		
+		// SLIDE2:
+		
+		[Bindable]
+		private var connected:Boolean=true;
+		
+		private function setup():void {
+			NativeApplication.nativeApplication.addEventListener(flash.events.Event.NETWORK_CHANGE, checkNetwork);
+			ping(); 			
+		}		
+		private function checkNetwork(event:Event):void {
+			ping();
+		}
+		
+	public function ping():void{
+	    var headRequest:URLRequest = new URLRequest();
+	    headRequest.method = "HEAD";
+	    headRequest.url = "http://www.google.com";
+	    logEvent("Requesting: " + headRequest.url.toString());		
+	    var response:URLLoader = new URLLoader(headRequest);
+	    //response.addEventListener(HTTPStatusEvent.HTTP_STATUS,onHTTPStatus);
+	    response.addEventListener(Event.COMPLETE,onComplete);
+        response.addEventListener(IOErrorEvent.IO_ERROR,onError);  
+        //response.addEventListener(SecurityErrorEvent.SECURITY_ERROR,onSecurityError);
+	}
+			
+	public function onComplete(status:Event):void{
+	    logEvent("    Response received.");
+	    connected = true;
+	}
+			
+	public function onHTTPStatus(status:HTTPStatusEvent):void{
+	    logEvent("    Status: " + status.status);
+	}
+
+	public function onError(error:IOErrorEvent):void{
+	    logEvent("    Request failed. " + error.text);
+	    connected = false;
+	}
+						
+	public function onSecurityError(error:SecurityErrorEvent):void{
+	    logEvent("    Request failed. " + error.text);
+	}
+			
+	public function logEvent(entry:String):void {
+	    trace(entry);
+	}
+		
+		// TODO: change bounce image and add number of new messages
+		//		+ make an image when connect/not connected
+	]]>
+</mx:Script>
+	<mx:Label text="[NOT CONNECTED]" visible="{!connected}" includeInLayout="{!connected}"  fontSize="18" color="#FD021A"/>
+	<mx:HBox width="100%" id="accountSelectionBox" >
+		<mx:TextInput id="accountField" />
+		<mx:Button label="Select>"  click="account=accountField.text; currentState='accountSelected'" />
+		<mx:Label text=" or " />
+		<mx:LinkButton label="Cancel" click="currentState='accountSelected'" enabled="{account!=null}" />
+	</mx:HBox>
+	<!-- FIXME: create a html page that can be access/distributed from the application -->
+	<mx:HTML width="100%" height="100%" id="html"  location="app:/pleaseWait.html" 
+				locationChange="trace('locationChange');removeInterval();" 
+				htmlDOMInitialize="trace('htmlDOMInitialize'); " 
+				complete="trace('complete'); addInterval();" 
+				initialize="trace('initialize')" />
+</mx:WindowedApplication>

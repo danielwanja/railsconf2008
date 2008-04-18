@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel 
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	title="Recorder" 
+	layout="vertical" 
+	width="360" height="352">
+	<mx:states>
+		<mx:State name="recording">
+			<mx:SetProperty target="{btn}" name="label" value="Stop"/>
+			<mx:SetEventHandler target="{btn}" name="click" handler="stopRecording()"/>
+		</mx:State>
+	</mx:states>
+<mx:UIComponent id="recorder" width="320" height="240" />
+	<mx:Button label="Record" id="btn" click="record()"/>
+	<mx:ProgressBar label="Sound Level" id="soundLevel" mode="manual" labelPlacement="right" enabled="true"/>
+	
+<mx:Script>
+	<![CDATA[
+		import flash.media.Video;
+		import mx.controls.Alert;
+		import flash.events.Event;
+	    import flash.events.StatusEvent;
+		
+		[Bindable]
+        public var camera:Camera;
+        
+        [Bindable]
+        public var microphone:Microphone;
+        
+		public var video:Video
+		
+		private var buffer:RecorderBuffer;
+		
+		public function prepare():void {
+			insertWebcamVideo();
+		}
+		public function insertWebcamVideo():void{
+		   camera = Camera.getCamera();
+		   if (camera==null) {
+		   	  mx.controls.Alert('Camera not found. @TODO: implement camera chooser.');
+		   	  return;
+		   }
+		   microphone = Microphone.getMicrophone();
+		   if (microphone==null) {
+		   	  trace("Microphone not found");
+		   } else {
+		   		trace("Mic:"+microphone);
+				microphone.rate = 11;
+				microphone.setUseEchoSuppression(true);
+				microphone.setLoopBack(true);
+				microphone.setSilenceLevel(5, 1000);		   	
+				microphone.addEventListener(ActivityEvent.ACTIVITY, microphoneActivity);	
+				soundLevel.setProgress(40, 100);	   	
+		   }
+		   
+		   
+		   camera.setMode(320, 240, 5);
+		   video = new Video(camera.width, camera.height);
+		   video.attachCamera(camera);
+		   //video.addEventListener(Event.ENTER_FRAME, traceEnterFrame);
+		   camera.addEventListener(StatusEvent.STATUS, traceEnterFrame);
+		   recorder.addChild(video);
+		}
+		/*
+		 see: http://osflash.org/flv
+		 The first byte of an audio packet contains bitflags that describe the codec used, with the following layout:
+Name 	Expression 	Description
+soundType 	(byte & 0×01) » 0 	0: mono, 1: stereo
+soundSize 	(byte & 0×02) » 1 	0: 8-bit, 1: 16-bit
+soundRate 	(byte & 0x0C) » 2 	0: 5.5 kHz, 1: 11 kHz, 2: 22 kHz, 3: 44 kHz
+soundFormat 	(byte & 0xf0) » 4 	0: Uncompressed, 1: ADPCM, 2: MP3, 5: Nellymoser 8kHz mono, 6: Nellymoser 
+		*/
+		public function microphoneActivity(event:ActivityEvent):void {
+			trace(event);
+			soundLevel.setProgress(microphone.activityLevel, 100);
+		}
+		
+		private var counter:Number =0;
+		public function traceEnterFrame(event:StatusEvent ):void {
+			counter++;
+			trace(counter+":"+event);
+		}
+		public function record():void {
+
+			buffer = new RecorderBuffer(video);
+			currentState = "recording";
+			buffer.start();
+		}
+		public function stopRecording():void {
+			currentState = "";
+			buffer.stop()
+			buffer.processContent();
+		}
+		
+	]]>
+</mx:Script>	
+</mx:Panel>

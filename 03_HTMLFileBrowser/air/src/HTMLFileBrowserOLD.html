@@ -1,0 +1,96 @@
+<html>
+<head>
+    <title>AIRHelloWorld</title>
+
+    <script src="AIRAliases.js" />
+    <script src="prototype.js" />
+    <style>
+      .row {
+      	margin-right:9px;
+      	border:1px solid #B5B5B5;
+      	padding:10px;
+      	background-color:#F3F3F3;        
+      }
+      .file {
+        border: solid 1px red;
+        background-color:#B2B2B2;
+      }      
+      .directory {
+      	background-color:#F3F3F3;
+      	list-style:none;
+      	height:25px;
+      	padding:5px;
+      	margin:1px;
+      }
+      .button {
+        float: right;
+      }
+      .browser {
+        float: left;
+      }
+      .container {
+      	border:1px solid #B5B5B5;
+      	margin-top:10px;
+      	overflow:auto;
+      	height:100%;
+      }
+    </style>
+    <script>
+        function debug()
+        {
+            trace("debug function called");
+            trace("File.desktopDirectory:"+air.File.desktopDirectory.nativePath);
+            trace("File.documentsDirectory:"+air.File.documentsDirectory.nativePath);
+            trace("File.userDirectory:"+air.File.userDirectory.nativePath);
+        }
+        var gag="gag";
+        function selectFolder(folder) {
+          trace("Selected folder");
+          $("path").value = folder.nativePath;
+          var files = folder.getDirectoryListing();
+          var content = "<div value='"+folder.nativePath+"' class='browser' />";
+          trace("File length:"+files.length)
+          for (var i = 0; i < files.length; i++) {
+            var item = ""
+            trace("File["+i+"]:"+files[i].name)
+              if (files[i].isDirectory) {
+                  item +=  files[i].name; 
+                  var btn = new Element('input', {  type: "Button", 
+                                                        value: '>', 
+                                                        'class':'button' });
+                  btn.onclick = "alert('hea')" 
+                  item = item + btn.outerHTML;
+                  
+                  //FIXME: the onclick handler doesn't work??? Need lowpro???
+                  //item += "<input type='Button' value='&gt;' class='button' onclick='alert(gag)' />";
+                  item = "<div class='row directory'>"+item+"</div>"
+trace("\t\t\titem:"+item)                  
+              } else {
+                  item += files[i].name; // + " ("+files[i].size+")";
+                  item = "<div class='row file'>"+item+"</div>"
+              }
+              content += item;
+          }
+          content += "</div>"
+          $('browser').insert(content);
+        }
+        
+        function trace(message) {
+          runtime.trace(message)
+          //$('trace').innerHTML = document.getElementById("trace").innerHTML
+          //      +"<BR/>" + message
+        }
+        
+    </script>
+
+</head>
+<body onload="debug()">
+  <input type="Button" value="Desktop"    onclick="selectFolder(air.File.desktopDirectory)" />
+  <input type="Button" value="Documents"  onclick="selectFolder(air.File.documentsDirectory)" />
+  <input type="Button" value="User"       onclick="selectFolder(air.File.userDirectory)" />
+	  <input type="text" id="path" style="width:100%"></input>  
+	  <div id="container" class="container">
+      <div id="browser" />
+    </div>
+</body>
+</html>

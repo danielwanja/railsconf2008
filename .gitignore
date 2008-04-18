@@ -3,3 +3,6 @@ bin-debug/*
 twitter.yml
 **/log/*.log
 **/tmp/**/*
+.actionScriptProperties
+.flexProperties
+.project

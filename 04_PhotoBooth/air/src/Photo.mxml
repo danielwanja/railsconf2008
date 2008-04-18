@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="88" height="88">
+<mx:Script>
+	<![CDATA[
+	]]>
+</mx:Script>
+	<mx:Image id="img" x="4" y="3" width="80" height="75"  source="{data}" scaleContent="true"/>
+	
+</mx:Canvas>

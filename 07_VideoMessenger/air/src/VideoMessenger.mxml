@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication 
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:custom="*"
+	applicationComplete="setup()" 
+	layout="vertical">
+<mx:HBox>
+	<custom:Recorder id="recorder" />
+	<custom:Player id="player" />
+</mx:HBox>
+<mx:Script>
+	<![CDATA[
+		import mx.controls.Alert;
+	
+		private function setup():void {
+			recorder.prepare();
+			player.prepare();
+		}			 			
+	]]>
+</mx:Script>	
+</mx:WindowedApplication>

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Retrieve twitter user friends.
+	@TODO:  - don't retrieve if already in graph
+			- better error handling
+-->
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:fc="http://www.adobe.com/2006/fc"
+	backgroundGradientColors="[#888888,#333333]"
+	layout="vertical"
+	applicationComplete="init();" 
+	width="100%" height="100%"
+ 	xmlns:local="*">
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.AsyncToken;
+			import com.adobe.flex.extras.controls.springgraph.GraphDataProvider;
+			import mx.controls.Alert;
+			
+            import mx.rpc.events.ResultEvent;
+            import com.adobe.flex.extras.controls.springgraph.SpringGraph;
+            import com.adobe.flex.extras.controls.springgraph.Item;
+            import com.adobe.flex.extras.controls.springgraph.Graph;
+            
+			[Bindable]
+			private var currentUser:String = 'railsconf2008';
+			
+			[Bindable]
+			private var selectedItem:Item;  // simple click selects user, double click retrieve friends
+			
+		private var graph:MyGraph = new MyGraph();
+		
+		// Rails server calls
+		// --------------------------------------
+		
+		private function init():void {
+			user.send();
+            roamer.repulsionFactor = 0.4;
+            roamer.showHistory = true;
+            setupGraph();
+		}
+			
+		private function searchTwitterUser(user:String):void {
+			
+		}	
+		/*
+		<user>
+  <description>Flex and Ruby on Rails developer</description>
+  <screen-name>danielwanja</screen-name>
+  <name>Daniel Wanja</name>
+  <profile-image-url>http://s3.amazonaws.com/twitter_production/profile_images/52403580/Photo_113_normal.jpg</profile-image-url>
+  <url>http://onrails.org</url>
+  <id type="integer">7221352</id>
+  <location>Denver</location>
+</user>
+	*/
+			
+		private function showUser(event:ResultEvent):void {
+			trace(event.result);
+			var user:XML = event.result as XML;
+			var item:Item = new Item(user.name);
+			item.data = user;
+			graph.add(item);
+			//roamer.currentItem = item;
+			roamer.dataProvider = graph;
+		}	
+		
+		private function showFriends(event:ResultEvent):void {
+			var result:XML = event.result as XML;
+			var users:XMLList = result.record;
+			var currentUser:Item = event.token.currentUser;
+			trace("Found friends for "+currentUser.data.name);
+			graph.disableNotification();
+			try {
+				for each (var user:XML in users) {
+					var friend:Item = new Item(user.name);
+					friend.data = user;
+					graph.add(friend);
+					graph.link(currentUser, friend);
+				}
+			} finally {
+				graph.enableNotification();
+			}
+			//roamer.currentItem = currentUser;
+			//roamer.dataProvider = graph;	
+			roamer.currentItem = currentUser;	
+		}
+		
+		// Graph Handlig
+		// --------------------------------------
+
+            /*
+            <Node id="1" prop="1(4)"/>
+            <Edge fromID="1.2.3.4" toID="1.2.3.4.5"/>
+            
+            */
+            private function setupGraph(): void {
+                controlPanel.maxDistanceFromCurrent.value = 2;
+                roamer.resetHistory();
+                roamer.resetShowHide();
+                roamer.xmlNames = ['user','Edge','fromID','toID']; //['Node','Edge','fromID','toID']
+                roamer.dataProvider = graph; 		
+                changeHelp1();
+            }
+            
+            public function itemDoubleClick(event: Event): void {
+                roamer.currentItem = event.currentTarget.data;
+                changeHelp2();
+				currentUser = roamer.currentItem.data.screen_name;  
+				//FIXME: don't retrieve if already retrieved
+                var call:AsyncToken = friends.send();
+                call.currentUser = roamer.currentItem;
+            }
+            
+            public function itemClick(event: Event) : void {
+            	selectedItem = event.currentTarget.data;
+            	trace("Selected:"+selectedItem);
+            }	
+        
+            private function changeHelp1(): void {
+                controlPanel.help.text = "Double click an item to make it the current item, drag the background to scroll";
+            }
+
+            private function changeHelp2(): void {
+                controlPanel.help.text = "Choose another data source, or try the other roamer controls";
+                var t:Timer = new Timer(10000, 1);
+                  t.addEventListener(TimerEvent.TIMER_COMPLETE, onTimerComplete);
+                 t.start();     
+            }
+
+            public function onTimerComplete(evt:TimerEvent):void
+            {
+                controlPanel.help.visible = false;
+            }
+ 		
+ 		    public function debug(o:Object):void {
+ 		    	trace(o);
+ 		    }
+		]]>
+	</mx:Script>					
+
+<mx:HTTPService id="user" url="http://localhost:3000/twitter/user/{currentUser}" 
+	resultFormat="e4x"
+	makeObjectsBindable="false" showBusyCursor="true" 
+	result="showUser(event)"
+	fault="mx.controls.Alert.show(event.fault.faultString, 'Retrieve User Failed')" />	
+	
+<mx:HTTPService id="friends" url="http://localhost:3000/twitter/friends/{currentUser}" 
+	resultFormat="e4x"
+	makeObjectsBindable="false" showBusyCursor="true" 
+	result="showFriends(event)"
+	fault="mx.controls.Alert.show(event.fault.faultString, 'Retrieve Friends Failed')" />	
+	
+<mx:TextInput x="259" y="10" id="twitterUser"/>
+<mx:Button x="427" y="10" label="Find" id="findBtn" click="searchTwitterUser(twitterUser.text)"/>
+<mx:HBox width="100%" height="100%">
+	<local:ControlPanel id="controlPanel"  roamer="{roamer}"/>
+	
+    <mx:HDividedBox width="100%" height="100%">    	
+
+    <fc:Roamer id="roamer" width="100%" height="100%" 
+        itemRenderer="XMLItemView"
+        repulsionFactor="{controlPanel.repulsion.value}" 
+        maxDistanceFromCurrent="{controlPanel.maxDistanceFromCurrent.value}" 
+        itemLimit="{controlPanel.maxVisible.value}"
+        autoFit="{controlPanel.autoFit.selected}"
+        motionThreshold="{controlPanel.motionThreshold.value}"
+        change="if(controlPanel.infoText != null) controlPanel.infoText.text = roamer.fullNodeCount + ' items, ' + roamer.visibleNodeCount + ' visible.';" right="0" left="0" top="0">
+
+        <fc:removeItemEffect>
+            <mx:Fade alphaFrom="1" alphaTo="0" duration="1000"/>                
+        </fc:removeItemEffect>
+        
+        <fc:addItemEffect>
+            <mx:Fade alphaFrom="0" alphaTo="1" duration="1000"/>
+        </fc:addItemEffect>
+    </fc:Roamer>
+
+        <mx:Accordion width="200" height="100%" >
+            <mx:Canvas label="Tweets {selectedItem.data.name}" width="100%" height="100%">
+              <mx:Text id="tweetsOnly" width="100%" height="100%" />
+              <mx:HTML id="twitterPage" location="http://twitter.com/{selectedItem.data.screen_name}"  visible="false" includeInLayout="false"
+              	  complete="tweetsOnly.text = twitterPage.domWindow.$('timeline').innerText"/>
+            </mx:Canvas>
+            <mx:Canvas label="XML" width="100%" height="100%">
+               <mx:Text text="{selectedItem.data.toXMLString()}" />
+            </mx:Canvas>
+        </mx:Accordion>
+
+    </mx:HDividedBox>
+</mx:HBox>	
+    <!--
+    -->	
+</mx:WindowedApplication>

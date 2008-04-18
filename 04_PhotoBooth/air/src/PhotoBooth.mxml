@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
+	applicationComplete="insertWebcamVideo();"
+	>
+<mx:Script>
+	<![CDATA[
+		import mx.core.BitmapAsset;
+		import mx.collections.ArrayCollection;
+		import mx.controls.Alert;
+            import mx.core.UIComponent;
+            import flash.media.Camera;
+            import flash.media.Video;
+            import flash.display.BitmapData;
+            import flash.filters.BlurFilter;
+
+			[Bindable]
+            public var camera:Camera;
+			public var video:Video
+
+			 public function insertWebcamVideo():void{
+			   camera = Camera.getCamera();
+			   if (camera==null) {
+			   	  mx.controls.Alert('Camera not found. @TODO: implement camera chooser.');
+			   	  return;
+			   }
+			   camera.setMode(640, 480, 5);
+			   video = new Video(camera.width, camera.height);
+			   video.attachCamera(camera);
+			   videoHolder.addChild(video);
+			  }
+			 	
+			  			
+			public function takeSnapshot():void{
+				var snapshot:BitmapData = new BitmapData(640, 480, true);
+				snapshot.draw(video)
+				photos.dataProvider.addItem(new BitmapAsset(snapshot));
+			}			     
+		
+	]]>
+</mx:Script>	
+<mx:VBox id="photo" width="640" height="480">
+	<mx:UIComponent id="videoHolder" width="640" height="480" />
+</mx:VBox>
+
+<mx:Button id="snapBtn" label="Smile!" width="100%" click="takeSnapshot()" enabled="{camera!=null}" />
+<mx:HorizontalList id="photos" width="100%" height="120" 
+		dataProvider="{new ArrayCollection()}"
+		itemRenderer="Photo" />
+</mx:WindowedApplication>

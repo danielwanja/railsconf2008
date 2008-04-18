@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	title="Player"
+	layout="vertical" 
+	width="360" height="280">
+	<mx:states>
+		<mx:State name="ready">
+			<mx:AddChild position="lastChild">
+			<mx:VideoDisplay id="display" width="320" height="240" source="http://localhost:3000/cap2.flv"
+				click="event.currentTarget.play()" 
+				autoPlay="false" />				
+			</mx:AddChild>
+			<mx:AddChild position="lastChild">
+				<mx:ProgressBar  source="{display}" mode="polled" maximum="{display.bytesTotal}" labelPlacement="right" enabled="true"/>
+			</mx:AddChild>
+			<mx:SetProperty name="height" value="318"/>
+		</mx:State>
+	</mx:states>
+<mx:Script>
+	<![CDATA[
+		public function prepare():void {
+			currentState = "ready";
+		}
+		private function togglePlay(player:VideoDisplay):void {
+			if (player.playing) 
+				player.pause();
+			else 
+				player.play();	 
+		}		
+	]]>
+</mx:Script>	
+</mx:Panel>

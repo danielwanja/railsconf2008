@@ -1,0 +1,9 @@
+development:
+  login: railsconf2008
+  password: secret
+test:
+  login: railsconf2008
+  password: secret
+production:
+  login: railsconf2008
+  password: secret
