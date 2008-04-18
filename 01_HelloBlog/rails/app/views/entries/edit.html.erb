@@ -1,0 +1,22 @@
+<h1>Editing entry</h1>
+
+<%= error_messages_for :entry %>
+
+<% form_for(@entry) do |f| %>
+  <p>
+    <b>Title</b><br />
+    <%= f.text_field :title %>
+  </p>
+
+  <p>
+    <b>Body</b><br />
+    <%= f.text_area :body %>
+  </p>
+
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @entry %> |
+<%= link_to 'Back', entries_path %>

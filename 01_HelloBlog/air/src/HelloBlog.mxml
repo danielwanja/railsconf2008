@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	layout="horizontal"
+	title="HelloBlog {html.location}" 
+	nativeDragEnter="onDragEnter(event)" nativeDragDrop="onDragDrop(event)" >
+	<mx:states>
+		<mx:State name="editMode">
+			<mx:AddChild position="lastChild">
+				<mx:HTML id="previewHTML"  x="435" y="23" width="50%" height="100%" htmlText="THIS IS SOME TEXT"/>
+			</mx:AddChild>
+			<mx:SetProperty target="{html}" name="width" value="50%"/>
+		</mx:State>
+	</mx:states>
+<mx:Script>
+	<![CDATA[
+		import flash.desktop.Clipboard;
+		import flash.desktop.ClipboardFormats;
+	
+		// slide 1
+		private function checkEditMode():void {
+			currentState = html.location.lastIndexOf("/edit")||html.location.lastIndexOf("/new") > 0 ? "editMode" : "";
+		}
+		private function listenToBodyChange():void {
+			html.domWindow.$('entry_body').addEventListener("keyup", entryChanged);
+		}
+		private function entryChanged(event:Object):void {
+			previewHTML.htmlText = html.domWindow.$('entry_body').value; //event.currentTarget.value;
+		}
+		
+		// slide 2
+		public function onDragEnter(event:NativeDragEvent):void {
+			if (currentState!='editMode') return;
+		    var transferable:Clipboard = event.clipboard;
+		    if(   transferable.hasFormat(ClipboardFormats.URL_FORMAT)
+		       || transferable.hasFormat(ClipboardFormats.TEXT_FORMAT)) {
+		            NativeDragManager.acceptDragDrop(this);
+		    } 
+		}
+		public function onDragDrop(event:NativeDragEvent):void {
+			var urlData:Object = event.clipboard.getData(ClipboardFormats.URL_FORMAT)
+			if (urlData==null) urlData = event.clipboard.getData(ClipboardFormats.TEXT_FORMAT);
+			var entryBody:Object = html.domWindow.$('entry_body');  
+			//FIXME: write test for the following insertion logic (or find a String insert function);
+			var value:String = entryBody.value;
+			entryBody.value =   value.substring(0, entryBody.selectionStart)
+							  + "<img src='"+urlData+"' /> "
+							  + value.substr(entryBody.selectionStart+entryBody.selectionEnd, value.length);	
+			entryChanged(null);				  						  
+		}			
+		
+	]]>
+</mx:Script>	
+<mx:HTML id="html" location="http://localhost:3000/entries"  width="100%" height="100%" 
+	locationChange="checkEditMode()" complete="if (currentState=='editMode') listenToBodyChange()" />	
+</mx:WindowedApplication>
