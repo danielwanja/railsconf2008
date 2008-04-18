@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Datasource: http://ichart.finance.yahoo.com/table.csv?s=AAPL&d=3&e=18&f=2008&g=d&a=8&b=7&c=1984&ignore=.csv
+	
+	Date,Open,High,Low,Close,Volume,Adj Close
+	2008-04-17,154.17,156.00,153.35,154.49,25152400,154.49
+	2008-04-16,151.72,154.10,150.62,153.70,28395000,153.70
+
+closeField, highField, lowField, openField, xField 
+
+	based on : http://www.stretchmedia.ca/code_examples/chart_range_selection/main.html
+	
+	
+	@TODO: replace HSlider with the overlayCanvas.
+-->
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml"
+	applicationComplete="getChartData('AAPL');"
+	layout="vertical" xmlns:flexlib="flexlib.controls.*" xmlns:ns2="flexlib.charts.*">
+<mx:Script>
+	<![CDATA[
+		import mx.graphics.Stroke;
+		import mx.graphics.SolidColor;
+		import mx.rpc.events.ResultEvent;
+		import mx.collections.ArrayCollection;
+		import mx.rpc.AsyncToken;
+
+		 [Bindable]
+		 public var symbols:ArrayCollection = new ArrayCollection();
+		 
+		 [Bindable]
+		 public var selectedTickers:ArrayCollection = new ArrayCollection();
+		
+		 [Bindable]
+	     public var tickersData:ArrayCollection = new ArrayCollection();
+
+		private function getChartData(ticker:String):void {
+								 // http://ichart.finance.yahoo.com/table.csv?s=AAPL&d=3&e=18&f=2008&g=d&a=8&b=7&c=1984&ignore=.csv
+			var call:AsyncToken = chartDataRequest.send({s:ticker, a:1, b:1, c:2007});
+			call.ticker = ticker;
+		}
+		private function loadData(event:ResultEvent):void {
+			var data:Array = cvsToProvider(event.result as String);
+			var symbolData:Object = {label:event.token.ticker, data:data};
+			symbols.addItemAt(symbolData, 0);
+			showSymbol(symbolData);
+		}
+		private function showSymbol(symbolData:Object):void {
+			tickersData.source = symbolData.data;
+			if (dateSelector.maximum != tickersData.length) {
+				dateSelector.maximum = tickersData.length;
+				dateSelector.values = [0, tickersData.length-1];
+			}
+			selectionChanged();			
+		}
+		
+		// dateSelector
+		private function selectionChanged():void {
+			var source:Array = tickersData.toArray();
+			selectedTickers.source = source.slice(dateSelector.values[0], dateSelector.values[1]);
+		}
+		
+		/**
+		 * From Date,Open,High,Low,Close,Volume,Adj Close
+		 *		2008-04-17,154.17,156.00,153.35,154.49,25152400,154.49
+		 * To
+		 *
+		 */
+		private function cvsToProvider(csv:String):Array {
+			var data:Array = [];
+			if (csv==null) return null;
+			var entries:Array = csv.split("\n");
+			if (entries.length>1) {
+				for (var i:Number=1; i<entries.length;i++) {
+					var parts:Array = entries[i].split(',');
+					data.push({date: parts[0],
+							   open: Number(parts[1]),
+							   close: Number(parts[2]),
+							   high:  Number(parts[3]),
+							   low: Number(parts[4])});
+				}
+			}			
+			return data;
+		}
+		
+		
+	]]>
+</mx:Script>
+<mx:HTTPService id="chartDataRequest" url="http://ichart.finance.yahoo.com/table.csv" result="loadData(event)" />	
+<mx:HBox width="100%" height="100%">
+	<mx:VBox width="211" height="100%">
+		<mx:HBox>
+			<mx:TextInput id="searchSymbol" /><mx:Button label="Go" click="getChartData(searchSymbol.text)" />
+		</mx:HBox>
+		<mx:List dataProvider="{symbols}"  width="100%" height="100%" change="showSymbol(event.currentTarget.selectedItem)" />
+	</mx:VBox>
+	<mx:VBox width="100%" height="100%">
+		<mx:HLOCChart  width="100%" height="80%" id="hlocchart1" dataProvider="{selectedTickers}" showDataTips="true">
+		       <mx:verticalAxis>
+	                <mx:LinearAxis id="vaxis" baseAtZero="false" title="Price" />
+	            </mx:verticalAxis>
+	
+	
+	            <mx:horizontalAxis>
+	                <mx:CategoryAxis id="haxis" categoryField="date" title="Date" />
+	            </mx:horizontalAxis>
+	
+	            <mx:horizontalAxisRenderers>
+	                <mx:AxisRenderer axis="{haxis}" canDropLabels="true"/>
+	            </mx:horizontalAxisRenderers>
+		
+			<mx:series>
+				<mx:HLOCSeries 
+	                    openField="open" 
+	                    highField="high" 
+	                    lowField="low" 
+	                    closeField="close"
+	                />
+	
+			</mx:series>
+		</mx:HLOCChart>
+		<mx:Legend dataProvider="{hlocchart1}"/>
+		
+		<mx:CartesianChart id="linechart1" width="100%" height="20%" dataProvider="{tickersData}" >
+	       <mx:verticalAxis>
+                <mx:LinearAxis  baseAtZero="false" title="Price" />
+            </mx:verticalAxis>	
+	        <mx:horizontalAxisRenderer>
+	        	<mx:AxisRenderer visible="false" />
+	        </mx:horizontalAxisRenderer>
+			<mx:series>
+				<mx:AreaSeries yField="close" areaStroke="{new Stroke(0x0033CC, 2)}" areaFill="{new SolidColor(0x0033CC, 0.5)}" />
+			</mx:series>		
+
+ 			<mx:annotationElements>
+                <mx:HDividedBox id="overlayCanvas" width="100%" alpha="1" dividerAffordance="5" horizontalGap="10" verticalGap="0" horizontalScrollPolicy="off" > 
+                    <mx:Canvas id="leftBox" height="100%"
+                               width="{(overlayCanvas.width / tickersData.length) * dateSelector.values[0]}" 
+                               backgroundAlpha="0.8" backgroundColor="#EEEEEE" borderThickness="1" borderColor="#999999" borderStyle="solid" />
+                    <mx:Canvas id="visibleBox" width="100%" height="100%"  />
+                    <mx:Canvas id="rightBox" height="100%" 
+                               width="{(overlayCanvas.width / tickersData.length) * (tickersData.length - dateSelector.values[1])}" 
+                               backgroundAlpha="0.8" backgroundColor="#EEEEEE" borderThickness="1" borderColor="#999999" borderStyle="solid"/>
+                </mx:HDividedBox>
+            </mx:annotationElements>
+			
+				
+		</mx:CartesianChart>
+		
+		<flexlib:HSlider id="dateSelector" thumbCount="2"  liveDragging="true" change="selectionChanged()"  width="100%"/>
+	</mx:VBox>		
+</mx:HBox>	
+</mx:WindowedApplication>
