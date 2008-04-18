@@ -1,0 +1,21 @@
+Projects to demonstrate Powering AIR with Rails.
+
+@NOTE: this are only place holeder with initial testing. 
+We can regorganized to a more logical approach as required.
+
+01_HelloBlog
+02_VotingApp
+03_HTMLFileBrowser
+04_PhotoBooth
+05_VisualBlog
+06_WebSnipet
+07_VideoMessenger
+08_OfflineCampfire
+09_PortfolioViewer
+10_S3BrowserNoRails
+11_S3BrowserRails
+12_TwitterClient
+
+Enjoy,
+
+Daniel and Tony!
