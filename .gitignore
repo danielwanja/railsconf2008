@@ -1,5 +1,5 @@
-/bin-debug
+bin-debug/*
 .DS_Store
 twitter.yml
 log/*.log
-/tmp
+tmp/*
