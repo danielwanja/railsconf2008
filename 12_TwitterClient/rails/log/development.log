@@ -1,0 +1,36 @@
+# Logfile created on Fri Apr 18 15:48:08 -0600 2008
+
+Processing TwitterController#user (for 127.0.0.1 at 2008-04-18 15:48:54) [GET]
+  Session ID: d80625cfd073ee1da9588c942cd37eb6
+  Parameters: {"action"=>"user", "id"=>"railsconf2008", "controller"=>"twitter"}
+Completed in 3.63438 (0 reqs/sec) | Rendering: 0.00011 (0%) | DB: 0.00000 (0%) | 200 OK [http://localhost/twitter/user/railsconf2008]
+
+
+Processing TwitterController#friends (for 127.0.0.1 at 2008-04-18 15:49:04) [GET]
+  Session ID: BAh7BiIKZmxhc2hJQzonQWN0aW9uQ29udHJvbGxlcjo6Rmxhc2g6OkZsYXNo%0ASGFzaHsABjoKQHVzZWR7AA%3D%3D--697d7cb930c82c1feadfb194d6d47e94472dcc7b
+  Parameters: {"action"=>"friends", "id"=>"railsconf2008", "controller"=>"twitter"}
+Completed in 4.26400 (0 reqs/sec) | Rendering: 0.00011 (0%) | DB: 0.00000 (0%) | 200 OK [http://localhost/twitter/friends/railsconf2008]
+
+
+Processing TwitterController#user (for 127.0.0.1 at 2008-04-18 15:50:31) [GET]
+  Session ID: ddb079dff9921adc8efb24871129d7c1
+  Parameters: {"action"=>"user", "id"=>"railsconf2008", "controller"=>"twitter"}
+Completed in 4.28127 (0 reqs/sec) | Rendering: 0.00010 (0%) | DB: 0.00000 (0%) | 200 OK [http://localhost/twitter/user/railsconf2008]
+
+
+Processing TwitterController#friends (for 127.0.0.1 at 2008-04-18 15:50:42) [GET]
+  Session ID: BAh7BiIKZmxhc2hJQzonQWN0aW9uQ29udHJvbGxlcjo6Rmxhc2g6OkZsYXNo%0ASGFzaHsABjoKQHVzZWR7AA%3D%3D--697d7cb930c82c1feadfb194d6d47e94472dcc7b
+  Parameters: {"action"=>"friends", "id"=>"railsconf2008", "controller"=>"twitter"}
+Completed in 9.63412 (0 reqs/sec) | Rendering: 0.00009 (0%) | DB: 0.00000 (0%) | 200 OK [http://localhost/twitter/friends/railsconf2008]
+
+
+Processing TwitterController#friends (for 127.0.0.1 at 2008-04-18 15:50:58) [GET]
+  Session ID: BAh7BiIKZmxhc2hJQzonQWN0aW9uQ29udHJvbGxlcjo6Rmxhc2g6OkZsYXNo%0ASGFzaHsABjoKQHVzZWR7AA%3D%3D--697d7cb930c82c1feadfb194d6d47e94472dcc7b
+  Parameters: {"action"=>"friends", "id"=>"danielwanja", "controller"=>"twitter"}
+Completed in 9.69419 (0 reqs/sec) | Rendering: 0.00009 (0%) | DB: 0.00000 (0%) | 200 OK [http://localhost/twitter/friends/danielwanja]
+
+
+Processing TwitterController#friends (for 127.0.0.1 at 2008-04-18 15:51:40) [GET]
+  Session ID: BAh7BiIKZmxhc2hJQzonQWN0aW9uQ29udHJvbGxlcjo6Rmxhc2g6OkZsYXNo%0ASGFzaHsABjoKQHVzZWR7AA%3D%3D--697d7cb930c82c1feadfb194d6d47e94472dcc7b
+  Parameters: {"action"=>"friends", "id"=>"Scobleizer", "controller"=>"twitter"}
+Completed in 10.35299 (0 reqs/sec) | Rendering: 0.00010 (0%) | DB: 0.00000 (0%) | 200 OK [http://localhost/twitter/friends/Scobleizer]
