@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 	Start with just one HTML control.
+	Try adding to tile layout
 	Then add cover flow and scaling.
 -->
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" defaultButton="{goBtn}" 
@@ -11,7 +12,8 @@
 		import mx.containers.Panel;
         import mx.events.FlexEvent;
      
-		
+		[Bindable]
+		private var pages:Number = 0;
 		private function addPage(url:String):void {
 			var html:HTML = new HTML();
 			html.location = url;
@@ -24,7 +26,7 @@
 			panel.height = 300;
 			panel.addChild(html);
 			coverflow.addChild(panel);
-			//FIXME: find how to trigger scrollbar update.
+			scrollbar.setScrollProperties(1, 0, coverflow.numChildren-1);
 		}
 	]]>
 </mx:Script>	
@@ -32,16 +34,13 @@
 		<mx:TextInput id="addressBar"  width="100%" />
 		<mx:Button id="goBtn" label="Go" click="addPage(addressBar.text)"/>		
 	</mx:HBox>
-            
+           
     <containers:CoverFlowContainer id="coverflow" width="100%" height="100%" 
         horizontalGap="40" borderStyle="inset" backgroundColor="0x000000"
         segments="6" reflectionEnabled="true">
         
     </containers:CoverFlowContainer>
-            
-        <mx:HScrollBar id="scrollbar" width="100%" pageSize="1" maxScrollPosition="{coverflow.getChildren().length - 1}"
-            scrollPosition="{coverflow.selectedIndex}" 
-            scroll="coverflow.selectedIndex = Math.round(scrollbar.scrollPosition)" />
+        <mx:HScrollBar id="scrollbar" width="100%"  scroll="coverflow.selectedIndex = Math.round(scrollbar.scrollPosition)" />
                 
 
 
