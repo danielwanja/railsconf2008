@@ -1,0 +1,12 @@
+# Client
+-swf video.swf
+-swf-version 9
+-main samples.Main
+-debug
+
+
+--next
+# Server
+-neko server.n
+-main hxvid.Server
+--override

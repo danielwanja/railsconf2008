@@ -12,12 +12,15 @@ closeField, highField, lowField, openField, xField
 	
 	
 	@TODO: replace HSlider with the overlayCanvas.
+		   remove deprecation warnings
 -->
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml"
 	applicationComplete="getChartData('AAPL');"
+	backgroundColor="#EFEBEB"
 	layout="vertical" xmlns:flexlib="flexlib.controls.*" xmlns:ns2="flexlib.charts.*">
 <mx:Script>
 	<![CDATA[
+		import mx.controls.Alert;
 		import mx.graphics.Stroke;
 		import mx.graphics.SolidColor;
 		import mx.rpc.events.ResultEvent;
@@ -85,7 +88,7 @@ closeField, highField, lowField, openField, xField
 		
 	]]>
 </mx:Script>
-<mx:HTTPService id="chartDataRequest" url="http://ichart.finance.yahoo.com/table.csv" result="loadData(event)" />	
+<mx:HTTPService id="chartDataRequest" url="http://ichart.finance.yahoo.com/table.csv" result="loadData(event)"  fault="mx.controls.Alert.show('Symbol Not Found')" />	
 <mx:HBox width="100%" height="100%">
 	<mx:VBox width="211" height="100%">
 		<mx:HBox>
@@ -114,6 +117,7 @@ closeField, highField, lowField, openField, xField
 	                    highField="high" 
 	                    lowField="low" 
 	                    closeField="close"
+	                     stroke="{new Stroke(0x6B92D7, 2)}"
 	                />
 	
 			</mx:series>
@@ -132,14 +136,14 @@ closeField, highField, lowField, openField, xField
 			</mx:series>		
 
  			<mx:annotationElements>
-                <mx:HDividedBox id="overlayCanvas" width="100%" alpha="1" dividerAffordance="5" horizontalGap="10" verticalGap="0" horizontalScrollPolicy="off" > 
+                <mx:HDividedBox id="overlayCanvas" width="100%" alpha="1" dividerAffordance="5" horizontalGap="10" verticalGap="0" horizontalScrollPolicy="off"> 
                     <mx:Canvas id="leftBox" height="100%"
                                width="{(overlayCanvas.width / tickersData.length) * dateSelector.values[0]}" 
-                               backgroundAlpha="0.8" backgroundColor="#EEEEEE" borderThickness="1" borderColor="#999999" borderStyle="solid" />
+                               backgroundAlpha="0.5" backgroundColor="#EEEEEE" borderThickness="1" borderColor="#999999" borderStyle="solid" />
                     <mx:Canvas id="visibleBox" width="100%" height="100%"  />
                     <mx:Canvas id="rightBox" height="100%" 
                                width="{(overlayCanvas.width / tickersData.length) * (tickersData.length - dateSelector.values[1])}" 
-                               backgroundAlpha="0.8" backgroundColor="#EEEEEE" borderThickness="1" borderColor="#999999" borderStyle="solid"/>
+                               backgroundAlpha="0.5" backgroundColor="#EEEEEE" borderThickness="1" borderColor="#999999" borderStyle="solid"/>
                 </mx:HDividedBox>
             </mx:annotationElements>
 			
