@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" creationComplete="setup()">
+<mx:Script>
+	<![CDATA[
+		[Bindable]
+		private var file:File;
+		private function setup():void {
+			file = data as File;
+			progressBar.label = file.name;
+//			file.addEventListener( ProgressEvent.PROGRESS, progressHandler );
+			//FIXME: progress isn't updated????			
+			file.addEventListener( IOErrorEvent.IO_ERROR, errorHandler );
+		}
+		private function progressHandler( e:ProgressEvent ) :void {
+			trace("progress:"+e.bytesLoaded+"/"+e.bytesTotal);
+		}
+		private function errorHandler( e:IOErrorEvent ) :void {
+			trace("error:"+e.toString());
+			progressBar.indeterminate=false;
+			//FIXME: show error
+		}
+		
+				
+	]]>
+</mx:Script>
+	<mx:ProgressBar id="progressBar"  indeterminate="true" />
+</mx:VBox>

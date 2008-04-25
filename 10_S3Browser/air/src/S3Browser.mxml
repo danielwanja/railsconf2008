@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Presentation could be:
+		1. implement drop (show in transmit)
+		2. add list
+		3  add double click to show image
+		4  add upload mode
+		5  add delete
+-->
+<mx:WindowedApplication 
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:local="*"
+	nativeDragEnter="onDragEnter(event)" nativeDragDrop="onDragDrop(event)" 
+	layout="vertical" backgroundGradientAlphas="[1.0, 1.0]" backgroundGradientColors="[#505050, #505050]">	
+<mx:Script>
+	<![CDATA[
+		import mx.collections.ArrayCollection;
+		import mx.controls.Alert;
+		import mx.managers.DragManager;
+		
+		// Drag&Drop Management
+		public function onDragEnter(event:NativeDragEvent):void {
+			if (currentState=='uploadingMode') return;
+		    if(event.clipboard.hasFormat(ClipboardFormats.FILE_LIST_FORMAT)) {
+		            NativeDragManager.acceptDragDrop(this);
+		    } 
+		}
+		
+		
+		[Bindable]
+		private var fileList:ArrayCollection;
+		public function onDragDrop(event:NativeDragEvent):void {
+			// 1. get dragged data
+            var files:Array = event.clipboard.getData(ClipboardFormats.FILE_LIST_FORMAT ) as Array;
+            fileList = new ArrayCollection();
+            view.selectedChild = uploadView;
+            
+            // 2. show progress bar for each file to upload
+            for each (var f:File in files)
+            {
+				fileList.addItem(f);
+            }        
+            
+            // 3. ask each file to upload
+			var request:URLRequest = new URLRequest();
+            request.url = "http://localhost:3000/assets";
+            request.method = "POST";                        
+            for each (f in fileList) {
+				f.addEventListener(ProgressEvent.PROGRESS, progressHandler);
+	            f.addEventListener(Event.COMPLETE, completeHandler);            
+	            f.upload(request);  
+            }
+		}	
+		private function progressHandler( e:ProgressEvent ) :void {
+			trace("progress:"+FileReference(e.target).name+" progress:"+e.bytesLoaded+"/"+e.bytesTotal);
+		}
+
+		private function completeHandler( e:Event ) :void {
+			var fr:FileReference = FileReference(e.target);	
+			fileList.removeItemAt(fileList.getItemIndex(fr));		
+			trace("done:"+fr.name);
+			if (fileList.length==0) view.selectedChild=listView;
+			//FIXME: add notification when all is complete and download error occured
+		}
+	]]>
+</mx:Script>
+<mx:ToggleButtonBar id="buttonBar" >
+	<mx:dataProvider>
+        <mx:String>Drop</mx:String>
+        <mx:String>List</mx:String>
+	</mx:dataProvider>
+</mx:ToggleButtonBar>
+
+<mx:ViewStack id="view" width="100%" height="100%" selectedIndex="{buttonBar.selectedIndex}" creationPolicy="all">
+	<!-- Drop Mode -->	
+	<mx:VBox id="dropView" width="100%" height="100%" paddingBottom="30" paddingLeft="30" paddingRight="30" paddingTop="30" >
+		<mx:VBox id="dropZone" 
+				width="100%" height="100%"
+				backgroundColor="#6BE66B" backgroundAlpha="0.44" horizontalAlign="center" verticalAlign="middle">
+		<mx:Label x="50" y="21" text="Drop File Here"  fontSize="36"/>
+		</mx:VBox>
+	</mx:VBox>
+	
+	<!-- List Mode -->
+	<mx:VBox id="listView" width="100%" height="100%" show="assetList.send()">
+		<mx:DataGrid dataProvider="{assetList.lastResult.asset}" width="100%" height="100%"
+			doubleClickEnabled="true" doubleClick="currentFile=event.currentTarget.selectedItem; view.selectedChild=imageView" >
+			<mx:columns>
+				<mx:DataGridColumn headerText="Filename" dataField="filename"/>
+				<mx:DataGridColumn headerText="Size" dataField="size"/>
+				<mx:DataGridColumn headerText="Modified" dataField="updated-at"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:Label text="Double click to view images." />
+	</mx:VBox>
+	
+	<!-- View Image Mode -->
+	<mx:VBox id="imageView" width="100%" height="100%">
+		<mx:Script>
+			<![CDATA[
+				[Bindable]
+				private var currentFile:Object;
+			]]>
+		</mx:Script>
+		<mx:Image id="image" source="http://localhost:3000/assets/{currentFile.id}" width="100%" height="100%" />
+		<mx:ProgressBar source="{image}" />
+		<mx:Button label="Delete" click="assetDelete.send()" />
+	</mx:VBox>
+	
+	<!-- Upload Mode -->
+	<mx:VBox id="uploadView" width="100%" height="100%">
+		<mx:Repeater id="fileRepeater" dataProvider="{fileList}" recycleChildren="false">
+			<local:FileUpload data="{fileRepeater.currentItem}"  width="100%"/>
+		</mx:Repeater>
+	</mx:VBox>
+	
+</mx:ViewStack>
+<mx:HTTPService id="assetList" url="http://localhost:3000/assets.xml"  resultFormat="e4x"	/>
+<mx:HTTPService id="assetDelete" url="http://localhost:3000/assets/{currentFile.id}.xml" 
+	method="POST" resultFormat="e4x" result="view.selectedChild=listView">
+	<mx:request>
+		<_method>delete</_method>
+	</mx:request>	
+</mx:HTTPService>
+
+</mx:WindowedApplication>
