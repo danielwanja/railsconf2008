@@ -31,11 +31,7 @@
 		public var video:Video
 		
 		
-		public function prepare():void {
-			flash.net.NetConnection.defaultObjectEncoding = flash.net.ObjectEncoding.AMF0;
-			insertWebcamVideo();					
-		}
-		public function insertWebcamVideo():void{
+		public function prepare():void {			
 		   camera = Camera.getCamera();
 		   if (camera==null) {
 		   	  mx.controls.Alert('Camera not found. @TODO: implement camera chooser.');
@@ -91,7 +87,7 @@
 		}
 		private function connected(event:NetStatusEvent):void {
 			if (event.info.code!="NetConnection.Connect.Success") {
-				mx.controls.Alert.show(event.info.toString(), "Failed to connect to server.");
+				mx.controls.Alert.show(event.info.toString(), "Recorder failed to connect to server.");
 				nc = null;
 				return;
 			}

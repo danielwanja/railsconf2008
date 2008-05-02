@@ -8,7 +8,7 @@
 		<mx:State name="ready">
 			<mx:AddChild position="lastChild">
 			<mx:VideoDisplay id="display" width="320" height="240" source="http://localhost:3000/myrecording.flv"
-				click="event.currentTarget.play()" 
+				click="togglePlay(event.currentTarget as VideoDisplay)" 
 				autoPlay="false" />				
 			</mx:AddChild>
 			<mx:AddChild position="lastChild">

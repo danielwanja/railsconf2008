@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  was http://localhost:3000/myrecording.flv
+-->  
+<mx:Panel 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	title="Player"
+	layout="vertical" 
+	width="360" height="330"
+	creationComplete="callLater(connect);">
+<mx:Script>
+	<![CDATA[
+		import mx.controls.Alert;
+		private var nc:NetConnection;
+		[Bindable]	
+		private var ns:NetStream;
+		public var video:Video;
+		
+		public function connect():void {
+			nc = new NetConnection();
+			nc.connect("rtmp://localhost");
+			nc.addEventListener (NetStatusEvent.NET_STATUS,connected);
+			video = new Video(320, 240);			
+			videoHolder.addChild(video);
+		}
+		private function connected(event:NetStatusEvent):void {
+			if (event.info.code!="NetConnection.Connect.Success") {
+				mx.controls.Alert.show(event.info.toString(), "Player failed to connect to server.");
+				nc = null;
+				return;
+			}			
+			ns = new NetStream(nc);
+			video.attachNetStream(ns);
+			ns.play("myrecording.flv"); // FIXME: add name selection per user				
+		}
+	]]>
+</mx:Script>
+	<mx:HBox>
+		<mx:Button label=">" click="ns.play('myrecording.flv')"  enabled="{ns!=null}"/>
+		<mx:Label text="time:{ns.time}" />	
+	</mx:HBox>
+	<mx:VBox width="320" height="240">
+		<mx:UIComponent id="videoHolder" width="320" height="240"  click="ns.togglePause()"/>
+	</mx:VBox>	
+</mx:Panel>

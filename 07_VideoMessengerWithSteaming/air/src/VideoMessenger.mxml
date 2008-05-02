@@ -25,15 +25,15 @@
 	layout="vertical">
 <mx:HBox>
 	<custom:Recorder id="recorder" />
-	<custom:Player id="player" />
+	<custom:StreamPlayer id="player" />
 </mx:HBox>
 <mx:Script>
 	<![CDATA[
 		import mx.controls.Alert;
 	
 		private function setup():void {
+			flash.net.NetConnection.defaultObjectEncoding = flash.net.ObjectEncoding.AMF0;			
 			recorder.prepare();
-			player.prepare();
 		}			 			
 	]]>
 </mx:Script>	
