@@ -23,7 +23,7 @@
             import com.adobe.flex.extras.controls.springgraph.Graph;
             
 			[Bindable]
-			private var currentUser:String = 'railsconf2008';
+			private var currentUser:String = 'thillerson'; //'railsconf2008';
 			
 			[Bindable]
 			private var selectedItem:Item;  // simple click selects user, double click retrieve friends
@@ -180,7 +180,7 @@
             <mx:Canvas label="Tweets {selectedItem.data.name}" width="100%" height="100%">
               <mx:Text id="tweetsOnly" width="100%" height="100%" />
               <mx:HTML id="twitterPage" location="http://twitter.com/{selectedItem.data.screen_name}"  visible="false" includeInLayout="false"
-              	  complete="tweetsOnly.text = twitterPage.domWindow.$('timeline').innerText"/>
+              	  complete="tweetsOnly.text = (twitterPage.domWindow.$ !== null)  ? twitterPage.domWindow.$('timeline').innerText : '500'"/>
             </mx:Canvas>
             <mx:Canvas label="XML" width="100%" height="100%">
                <mx:Text text="{selectedItem.data.toXMLString()}" />

@@ -1,0 +1,6 @@
+# Logfile created on Fri May 02 13:18:31 -0600 2008  [4;36;1mSQL (0.000455)[0m   [0;1mselect sqlite_version(*)[0m
+  [4;35;1mSQL (0.000000)[0m   [0mSQLite3::SQLException: no such table: photos: DROP TABLE photos[0m
+  [4;36;1mSQL (0.002407)[0m   [0;1mCREATE TABLE photos ("id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "size" integer DEFAULT NULL, "content_type" integer DEFAULT NULL, "filename" varchar(255) DEFAULT NULL, "height" integer DEFAULT NULL, "width" integer DEFAULT NULL, "parent_id" integer DEFAULT NULL, "thumbnail" varchar(255) DEFAULT NULL, "created_at" datetime DEFAULT NULL, "updated_at" datetime DEFAULT NULL) [0m
+  [4;35;1mSQL (0.002334)[0m   [0mCREATE TABLE schema_info (version integer)[0m
+  [4;36;1mSQL (0.001644)[0m   [0;1mINSERT INTO schema_info (version) VALUES(0)[0m
+  [4;35;1mSQL (0.001771)[0m   [0mUPDATE schema_info SET version = 1[0m
