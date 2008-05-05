@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	backgroundColor="0xCCCCCC"
+	borderStyle="solid"
+	borderColor="0x000000"
+	width="400"
+	height="100"
+	creationComplete="readSettings()"
+	>
+	<mx:Script>
+	<![CDATA[
+	
+		private var so:SharedObject = SharedObject.getLocal('air-campfire-prefs');
+		
+		private function readSettings():void {
+			if (so.data['restoreOnMessage'] != null || so.data['growlOnMessage'] != null) {
+				restoreCheckBox.selected = so.data['restoreOnMessage'] as Boolean;
+				growlCheckBox.selected = so.data['growlOnMessage'] as Boolean;
+			} else { // make some defaults
+				so.data['restoreOnMessage'] = restoreCheckBox.selected;
+				so.data['growlOnMessage'] = growlCheckBox.selected;
+			}
+		}
+		
+		private function settingsChanged():void {
+			so.data['restoreOnMessage'] = restoreCheckBox.selected;
+			so.data['growlOnMessage'] = growlCheckBox.selected;
+		}
+		
+		
+	]]>
+	</mx:Script>
+	
+	<mx:CheckBox
+		id="growlCheckBox"
+		label="Notifiy on new message when window inactive"
+		click="settingsChanged()"
+	/>
+	<mx:CheckBox
+		id="restoreCheckBox"
+		top="{growlCheckBox.height}"
+		label="Restore window on new message if window minimized"
+		click="settingsChanged()"
+	/>
+	<mx:Button
+		id="closeButton"
+		bottom="10"
+		label="Close"
+		horizontalCenter="0"
+		click="dispatchEvent(new Event('close'))"
+	/>
+	
+</mx:Canvas>

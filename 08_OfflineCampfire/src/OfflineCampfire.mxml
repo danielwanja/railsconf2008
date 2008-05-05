@@ -4,30 +4,36 @@
 	 NativeApplication.nativeApplication.icon.menu
 	 
 -->
-<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
-	applicationComplete="setup()">
-	<mx:states>
-		<mx:State name="accountSelected">
-			<mx:RemoveChild target="{accountSelectionBox}"/>
-			<mx:AddChild relativeTo="{html}" position="before">
-				<mx:LinkButton label="Select Account" click="currentState=''"/>
-			</mx:AddChild>
-			<mx:SetProperty target="{html}" name="location" value="http://{account}.campfirenow.com"/>
-		</mx:State>
-	</mx:states>
+<mx:WindowedApplication
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	layout="vertical"
+	applicationComplete="setup()"
+>
+
 <mx:Script>
 	<![CDATA[
+		import mx.managers.PopUpManager;
+		import mx.utils.StringUtil;
 		import flash.utils.clearInterval;
 		import flash.utils.setInterval;
 		import flash.desktop.NativeApplication;
-		import air.net.ServiceMonitor;
 	
 		[Bindable]
 		private var account:String=null;
 	
 		private var lastMessageId:String="not-a-message";
-		
 		private var intervalId:Number=-1;
+		private var restoreOnMessage:Boolean;
+		private var growlOnMessage:Boolean;
+		
+		private var preferencesView:SettingsView;
+		
+		private function setup():void {
+			readPreferences();
+			NativeApplication.nativeApplication.addEventListener(flash.events.Event.NETWORK_CHANGE, checkNetwork);
+			ping(); 			
+		}
+		
 		private function addInterval():void {
 			if (intervalId==-1)
 				intervalId = setInterval(checkMessages, 5*1000);			
@@ -39,31 +45,58 @@
 			}
 		}
 		
+		private function accountSelected():void {
+			account = accountField.text;
+			currentState='accountSelected';
+		}
+		
 		//FIXME: s ee if we can set an html event to trap when the body of a table changes.	
 		private function checkMessages():void {
 			if (currentState!='accountSelected') return;
 			try { // We may not be in a campfire room.			
-			  var messages:Array = html.domWindow.$$('tbody#chat > tr'); 
+			  var messages:Array = html.domWindow.$$('tbody#chat > tr');
 			} catch (err:Error) {
 			  return;
 			}
-
 			
 			var currentMessage:Object = messages!= null && messages.length>0 ? messages[messages.length-1] : null;
 			var currentMessageId:String = currentMessage ? currentMessage.id : 'no message' 
-			if (lastMessageId!=	currentMessageId) {
-				lastMessageId = currentMessageId;
-				dispatchNewMessageDetected();
+			if (lastMessageId != currentMessageId) {
+				try { // in case we don't recognize the html
+					var xml:XML = new XML(currentMessage.outerHTML as String);
+					var person:String = xml..td.(@['class'] == 'person').span.text();
+					var message:String = xml..td.(@['class'] == 'body').div.text();
+					lastMessageId = currentMessageId;
+					if (!StringUtil.isWhitespace(person)) // no notification if the "person" is campfire
+						dispatchNewMessageDetected(person, message);
+				} catch (e:Error) {
+					return;
+				}
 			}		
 		}
 		
-		private function dispatchNewMessageDetected():void {
-			trace("Messages:"+(lastMessageId ));	
-			if (NativeApplication.supportsDockIcon){		
-				trace("Let's bounce");	
-				var dockicon:DockIcon = NativeApplication.nativeApplication.icon as DockIcon;
-				dockicon.bounce("informational"); //Note, only bounces if application is not active.
-			}				
+		private function dispatchNewMessageDetected(person:String, message:String):void {
+			if (!NativeApplication.nativeApplication.activeWindow) {
+				if (NativeApplication.supportsDockIcon){		
+					var dockicon:DockIcon = NativeApplication.nativeApplication.icon as DockIcon;
+					dockicon.bounce("informational"); //Note, only bounces if application is not active.
+				}
+				restoreIfMinimized();
+				growl(person, message);
+			}
+		}
+		
+		private function growl(person:String, message:String):void {
+			if (growlOnMessage) {
+				var growlWindow:MessageNotification = new MessageNotification();
+				growlWindow.showMessage(person, message);
+			}
+		}
+		
+		private function restoreIfMinimized():void {
+			if (nativeWindow.displayState == NativeWindowDisplayState.MINIMIZED && restoreOnMessage) {
+				restore();
+			}
 		}
 		
 		// SLIDE2:
@@ -71,56 +104,81 @@
 		[Bindable]
 		private var connected:Boolean=true;
 		
-		private function setup():void {
-			NativeApplication.nativeApplication.addEventListener(flash.events.Event.NETWORK_CHANGE, checkNetwork);
-			ping(); 			
-		}		
 		private function checkNetwork(event:Event):void {
 			ping();
 		}
 		
-	public function ping():void{
-	    var headRequest:URLRequest = new URLRequest();
-	    headRequest.method = "HEAD";
-	    headRequest.url = "http://www.google.com";
-	    logEvent("Requesting: " + headRequest.url.toString());		
-	    var response:URLLoader = new URLLoader(headRequest);
-	    //response.addEventListener(HTTPStatusEvent.HTTP_STATUS,onHTTPStatus);
-	    response.addEventListener(Event.COMPLETE,onComplete);
-        response.addEventListener(IOErrorEvent.IO_ERROR,onError);  
-        //response.addEventListener(SecurityErrorEvent.SECURITY_ERROR,onSecurityError);
-	}
-			
-	public function onComplete(status:Event):void{
-	    logEvent("    Response received.");
-	    connected = true;
-	}
-			
-	public function onHTTPStatus(status:HTTPStatusEvent):void{
-	    logEvent("    Status: " + status.status);
-	}
-
-	public function onError(error:IOErrorEvent):void{
-	    logEvent("    Request failed. " + error.text);
-	    connected = false;
-	}
-						
-	public function onSecurityError(error:SecurityErrorEvent):void{
-	    logEvent("    Request failed. " + error.text);
-	}
-			
-	public function logEvent(entry:String):void {
-	    trace(entry);
-	}
+		private function ping():void{
+		    var headRequest:URLRequest = new URLRequest();
+		    headRequest.method = "HEAD";
+		    headRequest.url = "http://www.campfirenow.com/";
+		    logEvent("Requesting: " + headRequest.url.toString());		
+		    var response:URLLoader = new URLLoader(headRequest);
+		    //response.addEventListener(HTTPStatusEvent.HTTP_STATUS,onHTTPStatus);
+		    response.addEventListener(Event.COMPLETE,onComplete);
+	        response.addEventListener(IOErrorEvent.IO_ERROR,onError);  
+	        //response.addEventListener(SecurityErrorEvent.SECURITY_ERROR,onSecurityError);
+		}
+				
+		private function onComplete(status:Event):void{
+		    logEvent("    Response received.");
+		    connected = true;
+		}
+				
+		private function onError(error:IOErrorEvent):void{
+		    logEvent("    Request failed. " + error.text);
+		    connected = false;
+		}
+							
+		private function logEvent(entry:String):void {
+		    trace(entry);
+		}
 		
-		// TODO: change bounce image and add number of new messages
-		//		+ make an image when connect/not connected
+		
+		// Preferences
+		private function showPreferencesEdtor():void {
+			if (preferencesView == null) {
+				preferencesView = PopUpManager.createPopUp(this, SettingsView, true) as SettingsView;
+				preferencesView.addEventListener('close', hidePreferencesEditor);
+				PopUpManager.centerPopUp(preferencesView);
+			} else {
+				PopUpManager.addPopUp(preferencesView, this, true);
+			}
+		}
+		
+		private function hidePreferencesEditor(e:Event=null):void {
+			PopUpManager.removePopUp(preferencesView);
+			readPreferences()
+		}
+		
+		private function readPreferences():void {
+			var so:SharedObject = SharedObject.getLocal('air-campfire-prefs');
+			if (so.data['restoreOnMessage'] != null || so.data['growlOnMessage'] != null) {
+				restoreOnMessage = so.data['restoreOnMessage'] as Boolean;
+				growlOnMessage = so.data['growlOnMessage'] as Boolean;
+			}
+		}
+		
 	]]>
 </mx:Script>
-	<mx:Label text="[NOT CONNECTED]" visible="{!connected}" includeInLayout="{!connected}"  fontSize="18" color="#FD021A"/>
+
+	<mx:states>
+		<mx:State name="accountSelected">
+			<mx:RemoveChild target="{accountSelectionBox}"/>
+			<mx:AddChild relativeTo="{html}" position="before">
+				<mx:HBox id="menuContainer" width="100%" horizontalAlign="right">
+					<mx:LinkButton label="Select Account" click="currentState=''"/>
+					<mx:LinkButton label="Settings" click="showPreferencesEdtor()"/>
+				</mx:HBox>
+			</mx:AddChild>
+			<mx:SetProperty target="{html}" name="location" value="http://{account}.campfirenow.com"/>
+		</mx:State>
+	</mx:states>
+
+	<mx:Label text="[NOT CONNECTED]" visible="{!connected}" includeInLayout="{!connected}" fontSize="18" color="#FD021A"/>
 	<mx:HBox width="100%" id="accountSelectionBox" >
-		<mx:TextInput id="accountField" />
-		<mx:Button label="Select>"  click="account=accountField.text; currentState='accountSelected'" />
+		<mx:TextInput id="accountField" enter="accountSelected()" />
+		<mx:Button label="Select>" click="accountSelected()" />
 		<mx:Label text=" or " />
 		<mx:LinkButton label="Cancel" click="currentState='accountSelected'" enabled="{account!=null}" />
 	</mx:HBox>
