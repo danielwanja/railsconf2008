@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Window xmlns:mx="http://www.adobe.com/2006/mxml"
+	title="Snippets" 
+	layout="vertical" width="200" height="400"
+>
+	<mx:VBox id="snippetList" width="100%" height="100%" />
+</mx:Window>

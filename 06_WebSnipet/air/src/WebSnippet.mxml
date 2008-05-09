@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Daniel Wanja - http://onrails.org
+	
+Todo:  	- remove highlight while loading
+		- Crop highlight to html content
+		- imageWindow close should clear imagesWindow variable
+		- send Images to Rails or save to folder?	
+	
+-->
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:local="*" layout="absolute" 
+	applicationComplete="setup()"	
+>	
+	<mx:states>
+		<mx:State name="loading">
+			<mx:AddChild position="lastChild">
+				<mx:VBox verticalAlign="middle" horizontalAlign="center" width="100%" height="100%" backgroundAlpha="0.14" backgroundColor="white">
+					<mx:HTML location="app:/wait.html" />					
+				</mx:VBox>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+<mx:Script>
+	<![CDATA[
+		import mx.controls.Image;
+		import mx.core.Window;
+		import flash.ui.ContextMenu;
+		import flash.ui.ContextMenuItem;
+		
+		private var js:String;
+		private var appMenu:NativeMenu;
+		
+		private function setup():void {
+			loadJS();
+			setupHighlighter();
+			application.addEventListener(KeyboardEvent.KEY_UP, saveDiv);			
+		}
+		
+		private function loadJS():void {
+			var fileStream:FileStream = new FileStream();
+			fileStream.open(new File('app:/prototype.js'), FileMode.READ);
+			js = fileStream.readMultiByte(fileStream.bytesAvailable, "iso-8859-1");
+			fileStream.close();
+		}
+				
+		private var highlighter:Sprite;
+		private function setupHighlighter():void {
+			highlighter = new Sprite();
+	        highlighter.mouseEnabled =  false; // click goes behind
+	        highlighter.buttonMode = true;
+	        highlighter.contextMenu = appMenu;	   
+	        highlighter.addEventListener(MouseEvent.CLICK, saveDiv);             
+	        html.stage.addChild(highlighter);	
+		}
+		
+		private function load(url:String):void {
+			html.location = url;
+		    currentState = 'loading';
+		}
+		
+		private function loaded():void {
+			currentState = '';				
+			// Add custom JS.
+			html.domWindow; // The JavaScript window object for the root frame of the HTML DOM inside this control.
+			var scriptElement:Object = html.domWindow.document.createElement("script");
+			scriptElement.setAttribute("type", "text/javascript");
+			scriptElement.text = js; //'alert("I\'m in!")';
+			html.domWindow.document.body.appendChild(scriptElement);	
+			
+			// ADD MOUSEOVER and see if we can access dom
+			html.domWindow.document.body.addEventListener('mouseover', mouseOverHandler);		
+			
+		}
+		private var selectedDivInfo:Object;
+		private function mouseOverHandler(e:Object):void {			
+			var pos:Object = e.srcElement.viewportOffset(); // Using Prototype.js
+			var dim:Object = e.srcElement.getDimensions();
+			highlight(pos.left, pos.top+50, dim.width, dim.height);
+			selectedDivInfo = {element:e.srcElement, x:pos.left, y:pos.top+50, w:dim.width, h:dim.height};
+		}
+		
+		private function highlight(x:Number, y:Number, w:Number, h:Number):void {
+			highlighter.graphics.clear();	        
+		    highlighter.graphics.beginFill(0xFFCC00, 0.2);
+		    highlighter.graphics.lineStyle(3, 0xFFCC00, 0.9, false);
+		    highlighter.graphics.drawRect(x, y, w, h); // FIXME: clip to container
+		}
+		
+		// Save div if ctrl is pressed (FIXME: focus must be in a control for trigger to work);
+		private var imagesWindow:ImagesWindow;		
+		private function saveDiv(event:KeyboardEvent):void {
+			if (event.keyCode!=17) return;
+			event.stopImmediatePropagation();
+
+			var fullSnapshot:BitmapData = new BitmapData(html.width, html.height);
+			fullSnapshot.draw(html);
+			
+			var divSnapshot:BitmapData = new BitmapData(selectedDivInfo.w, selectedDivInfo.h);
+			var rect:Rectangle = new Rectangle(selectedDivInfo.x, selectedDivInfo.y-50, selectedDivInfo.w, selectedDivInfo.h);		
+			divSnapshot.copyPixels(fullSnapshot, rect, new Point(0,0));
+			
+			if (imagesWindow==null) imagesWindow = new ImagesWindow();
+			imagesWindow.open(false);
+			var image:Image = new Image();
+			image.data = new Bitmap(divSnapshot);
+			image.scaleContent = true;
+			image.percentWidth = 100;
+			imagesWindow.snippetList.addChildAt(image, 0);
+			imagesWindow.snippetList.verticalScrollPosition = 0;
+        }
+
+	]]>
+	
+</mx:Script>
+	<mx:Label top="2" text="Type URL and press enter. Pres 'control' key to take snapshot of highlighted section." fontStyle="italic" />
+	<mx:TextInput left="2" top="22" right="128" keyUp="if (event.keyCode==13) load(event.currentTarget.text);"/>
+	<mx:HTML id="html" top="50" bottom="2" right="2" left="2"  complete="loaded()" />
+</mx:WindowedApplication>
