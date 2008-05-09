@@ -3,18 +3,66 @@ Projects to demonstrate Powering AIR with Rails.
 @NOTE: this are only place holeder with initial testing. 
 We can regorganized to a more logical approach as required.
 
-01_HelloBlog
-02_VotingApp
-03_HTMLFileBrowser
-04_PhotoBooth
-05_VisualBlog
-06_WebSnipet
-07_VideoMessenger
+00_AIRBrowser [Flex]
+    mx:HTML
+    dougmccune CoverFlowContainer
+    
+01_HelloBlog [Flex+Rails]
+    ActionScript/Javascript Brige
+    Drag Drop API
+    
+02_VotingApp [delete that one]
+
+03_HTMLFileBrowser [HTML]
+  File System Access
+  AIRAliases.js
+
+04_PhotoBooth [Flex+Rails]
+  flash.media.Camera
+  flash.media.Video
+  flash.net.URLLoader
+  attachment_fu (file)
+
+05_VisualBlog [delete that one]
+  
+06_WebSnipet [Flex]
+    javascript injection using HTMLComponent
+    File
+    Sprite/drawing API
+    Window API
+
+07_VideoMessenger [delete that one]
+  uses SimpleFlvWriter.as (not efficient)
+  
+07_VideoMessengerWithSteaming [Flex+Haxe]
+  uses  haxevideo (written in Haxe and Neko) for rtmp protocol
+  flash.media.Video
+  flash.media.Microphone
+  flash.net.NetConnection
+  flash.net.NetStream
+  
 08_OfflineCampfire
+    Windowing API
+    flash.desktop.NativeApplication
+    DockIcon
+    SharedObject
+    
 09_PortfolioViewer
-10_S3BrowserNoRails
-11_S3BrowserRails
+  CartesianChart, HLOCChart
+  HTTPService
+  
+10_S3Browser
+  flash.filesystem.File.upload
+  HTTPService + REST (list, create, delete)  
+  attachment_fu (S3)
+  
 12_TwitterClient
+  com.adobe.flex.extras.controls.springgraph
+  twitter4r
+  
+13_SQLSync
+  
+XX_ChartExplorer
 
 Enjoy,
 
