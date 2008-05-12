@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" defaultButton="{goBtn}">
+	<mx:HBox>
+		<mx:TextInput id="addressBar"  width="100%" />
+		<mx:Button id="goBtn" label="Go" click="browser.location = addressBar.text; title='Loading...'"/>		
+	</mx:HBox>
+	<mx:HTML id="browser" width="100%" height="100%" complete="title=event.currentTarget.domWindow.document.title" />
+</mx:WindowedApplication>

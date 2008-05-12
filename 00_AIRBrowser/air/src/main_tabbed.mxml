@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" defaultButton="{goBtn}">
+<mx:Script>
+	<![CDATA[
+		import mx.core.Container;
+		import mx.containers.VBox;
+		import mx.controls.HTML;
+		
+		private function loadTab(url:String):void {
+			var html:HTML = (tabbedBrower.selectedChild as Container).getChildAt(0) as HTML;
+			html.location = url;
+			tabbedBrower.selectedChild.label = "Loading...";
+			html.addEventListener(Event.COMPLETE, setTabName);
+			var c:Container;
+		}
+		
+		[Bindable] private var tabCount:Number=1;
+		private function addTab():void {
+			var html:HTML = new HTML();
+			html.location = addressBar.text;
+			html.percentHeight = 100;
+			html.percentWidth = 100;
+			html.addEventListener(Event.COMPLETE, setTabName);
+			var container:VBox = new VBox();
+			container.addChild(html);
+			container.label = "Loading...";
+			tabbedBrower.addChild(container);
+			tabCount = tabbedBrower.numChildren;
+		}
+		
+		private function setTabName(event:Event):void {
+			event.currentTarget.parent.label = event.currentTarget.domWindow.document.title;
+		}
+		
+		private function removeTab():void {
+			tabbedBrower.removeChild(tabbedBrower.selectedChild);
+		}
+	]]>
+</mx:Script>
+	<mx:HBox>
+		<mx:TextInput id="addressBar"  width="100%" />
+		<mx:Button id="goBtn" label="Go" click="loadTab(addressBar.text)"/>	
+		<mx:Button label="+" click="addTab()" />
+		<mx:Button label="-" click="removeTab()" enabled="{tabCount>1}" />	
+	</mx:HBox>
+	<mx:TabNavigator id="tabbedBrower"  width="100%" height="100%">
+		<mx:VBox  width="100%" height="100%">
+			<mx:HTML  width="100%" height="100%" />
+		</mx:VBox>
+	</mx:TabNavigator>	
+</mx:WindowedApplication>
