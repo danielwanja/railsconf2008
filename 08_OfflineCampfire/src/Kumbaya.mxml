@@ -25,13 +25,40 @@
 		private var intervalId:Number=-1;
 		private var restoreOnMessage:Boolean;
 		private var growlOnMessage:Boolean;
+		private var showingPreferences:Boolean;
 		
 		private var preferencesView:SettingsView;
 		
 		private function setup():void {
 			readPreferences();
+			configureMenus();
+			configureListeners();
+			ping();
+			accountField.setFocus();
+		}
+		
+		private function configureMenus():void {
+			var rootMenu:NativeMenu = new NativeMenu();
+			var editMenu:NativeMenu = new NativeMenu();
+			var settingsMenuItem:NativeMenuItem = new NativeMenuItem("Preferences");
+			settingsMenuItem.addEventListener(Event.SELECT, settingsMenuSelected);
+
+			rootMenu.addSubmenu(editMenu, "Edit");
+			editMenu.addItem(settingsMenuItem);
+			
+			// decide where the "Edit" menu goes
+			if(NativeApplication.supportsMenu) {
+				NativeApplication.nativeApplication.menu = rootMenu;
+				DockIcon(NativeApplication.nativeApplication.icon).menu = rootMenu;
+			} else if(NativeWindow.supportsMenu) { 
+				nativeWindow.menu = rootMenu;
+				SystemTrayIcon(NativeApplication.nativeApplication.icon).menu = rootMenu;
+			}
+
+		}
+		
+		private function configureListeners():void {
 			NativeApplication.nativeApplication.addEventListener(flash.events.Event.NETWORK_CHANGE, checkNetwork);
-			ping(); 			
 		}
 		
 		private function addInterval():void {
@@ -50,7 +77,7 @@
 			currentState='accountSelected';
 		}
 		
-		//FIXME: s ee if we can set an html event to trap when the body of a table changes.	
+		//FIXME: see if we can set an html event to trap when the body of a table changes.	
 		private function checkMessages():void {
 			if (currentState!='accountSelected') return;
 			try { // We may not be in a campfire room.			
@@ -136,19 +163,28 @@
 		
 		
 		// Preferences
+		
+		private function settingsMenuSelected(e:Event):void {
+			showPreferencesEdtor();
+		}
+		
 		private function showPreferencesEdtor():void {
-			if (preferencesView == null) {
-				preferencesView = PopUpManager.createPopUp(this, SettingsView, true) as SettingsView;
-				preferencesView.addEventListener('close', hidePreferencesEditor);
-				PopUpManager.centerPopUp(preferencesView);
-			} else {
-				PopUpManager.addPopUp(preferencesView, this, true);
+			if (!showingPreferences) {
+				if (preferencesView == null) {
+					preferencesView = PopUpManager.createPopUp(this, SettingsView, true) as SettingsView;
+					preferencesView.addEventListener('close', hidePreferencesEditor);
+					PopUpManager.centerPopUp(preferencesView);
+				} else {
+					PopUpManager.addPopUp(preferencesView, this, true);
+				}
+				showingPreferences = true;
 			}
 		}
 		
 		private function hidePreferencesEditor(e:Event=null):void {
 			PopUpManager.removePopUp(preferencesView);
-			readPreferences()
+			readPreferences();
+			showingPreferences = false;
 		}
 		
 		private function readPreferences():void {
@@ -167,8 +203,8 @@
 			<mx:RemoveChild target="{accountSelectionBox}"/>
 			<mx:AddChild relativeTo="{html}" position="before">
 				<mx:HBox id="menuContainer" width="100%" horizontalAlign="right">
-					<mx:LinkButton label="Select Account" click="currentState=''"/>
 					<mx:LinkButton label="Settings" click="showPreferencesEdtor()"/>
+					<mx:LinkButton label="Select Account" click="currentState=''"/>
 				</mx:HBox>
 			</mx:AddChild>
 			<mx:SetProperty target="{html}" name="location" value="http://{account}.campfirenow.com"/>
