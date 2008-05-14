@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+	<![CDATA[
+		import mx.graphics.ImageSnapshot;
+		import mx.core.BitmapAsset;
+		
+		[Bindable]
+		[Embed('/img/kumbaya_icon_128x128.png')]
+		private var systemIcon:Class;
+		
+		[Bindable]
+		public var unreadMessages:int;
+		
+		public function windowActivate(e:Event):void {
+			clear();
+		}
+		
+		public function newUnreadMessage():void {
+			unreadMessages++;
+			callLater(updateIcon);
+		}
+		
+		public function clear():void {
+			unreadMessages = 0;
+			callLater(updateIcon);
+		}
+		
+		protected function updateIcon():void {
+			var snapshot:BitmapData = ImageSnapshot.captureBitmapData(this);
+			
+			if(NativeApplication.supportsSystemTrayIcon) {
+				SystemTrayIcon(NativeApplication.nativeApplication.icon).bitmaps = [snapshot];
+			} else if (NativeApplication.supportsDockIcon) {
+				DockIcon(NativeApplication.nativeApplication.icon).bitmaps = [snapshot];
+			}
+		}
+		
+	]]>
+	</mx:Script>
+	
+	<mx:Image source="{systemIcon}" width="128" height="128" />
+	<mx:Canvas
+		id="unreadMessageCountContainer"
+		borderStyle="solid"
+		borderThickness="0"
+		cornerRadius="8"
+		backgroundColor="0xFF0000"
+		minWidth="40"
+		minHeight="40"
+		right="0"
+		visible="{unreadMessages != 0}"
+		includeInLayout="{unreadMessages != 0}"
+		>
+		
+		<mx:Text id="unreadMessageCountText" color="0xFFFFFF" fontWeight="bold" fontSize="22" horizontalCenter="0" verticalCenter="0" text="{unreadMessages}" />
+	</mx:Canvas>
+	
+</mx:Canvas>

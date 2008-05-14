@@ -6,7 +6,10 @@
 -->
 <mx:WindowedApplication
 	xmlns:mx="http://www.adobe.com/2006/mxml"
-	layout="vertical"
+	xmlns:local="*"
+	layout="absolute"
+	width="100%"
+	height="100%"
 	applicationComplete="setup()"
 >
 
@@ -58,7 +61,8 @@
 		}
 		
 		private function configureListeners():void {
-			NativeApplication.nativeApplication.addEventListener(flash.events.Event.NETWORK_CHANGE, checkNetwork);
+			NativeApplication.nativeApplication.addEventListener(Event.NETWORK_CHANGE, checkNetwork);
+			NativeApplication.nativeApplication.addEventListener(Event.ACTIVATE, unreadMessageManager.windowActivate);
 		}
 		
 		private function addInterval():void {
@@ -108,6 +112,7 @@
 					var dockicon:DockIcon = NativeApplication.nativeApplication.icon as DockIcon;
 					dockicon.bounce("informational"); //Note, only bounces if application is not active.
 				}
+				unreadMessageManager.newUnreadMessage();
 				restoreIfMinimized();
 				growl(person, message);
 			}
@@ -211,17 +216,23 @@
 		</mx:State>
 	</mx:states>
 
+	
 	<mx:Label text="[NOT CONNECTED]" visible="{!connected}" includeInLayout="{!connected}" fontSize="18" color="#FD021A"/>
-	<mx:HBox width="100%" id="accountSelectionBox" >
+	<mx:HBox width="100%" id="accountSelectionBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" verticalAlign="middle">
 		<mx:TextInput id="accountField" enter="accountSelected()" />
 		<mx:Button label="Select>" click="accountSelected()" />
 		<mx:Label text=" or " />
 		<mx:LinkButton label="Cancel" click="currentState='accountSelected'" enabled="{account!=null}" />
 	</mx:HBox>
+	
+	<local:UnreadMessageManager id="unreadMessageManager" top="{accountSelectionBox.height}" />
+	
 	<!-- FIXME: create a html page that can be access/distributed from the application -->
-	<mx:HTML width="100%" height="100%" id="html"  location="app:/pleaseWait.html" 
-				locationChange="trace('locationChange');removeInterval();" 
-				htmlDOMInitialize="trace('htmlDOMInitialize'); " 
-				complete="trace('complete'); addInterval();" 
-				initialize="trace('initialize')" />
+	<mx:HTML top="{accountSelectionBox.height}" width="100%" height="100%" id="html"
+		location="app:/pleaseWait.html" 
+		locationChange="trace('locationChange');removeInterval();" 
+		htmlDOMInitialize="trace('htmlDOMInitialize'); " 
+		complete="trace('complete'); addInterval();" 
+		initialize="trace('initialize')" />
+		
 </mx:WindowedApplication>
