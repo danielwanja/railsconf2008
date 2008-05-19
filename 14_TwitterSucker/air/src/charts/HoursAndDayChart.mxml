@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300">
+<mx:Script>
+	<![CDATA[
+		import mx.charts.HitData;
+		import mx.charts.chartClasses.IAxis;
+		private var days:Array =  ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+		private function formatDays(labelValue:Object, previousLabelValue:Object=null, axis:IAxis=null):String {
+			return (labelValue<0 || labelValue>days.length) ? "" : days[labelValue];
+		}
+		private function formatHours(labelValue:Object, previousLabelValue:Object=null, axis:IAxis=null):String {
+			return labelValue+"h";
+		}
+		private function formatDataTip(hitData:HitData):String {
+			return hitData.item.count + " tweets @" + formatDays(hitData.item.w) +" at " + formatHours(hitData.item.h);
+    	}
+	]]>
+</mx:Script>
+	<mx:ArrayCollection id="tweetsHourAndDay"/>
+	<mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
+	<mx:Panel title="Tweets by Time of Day and Day of Week" width="100%" height="100%" >
+	    <mx:BubbleChart id="chart" width="100%" height="100%" dataProvider="{tweetsHourAndDay}" showDataTips="true" 
+	    	maxRadius="25"  dataTipFunction="formatDataTip"
+	    	left="4" right="8" bottom="8" top="45">
+	
+			<mx:horizontalAxis>
+				<mx:LinearAxis id="hAxis" labelFunction="formatHours"/>
+			</mx:horizontalAxis>
+	
+	        <mx:horizontalAxisRenderers>
+	        	<mx:AxisRenderer axis="{hAxis}" showLabels="true" canDropLabels="false"  />
+	    	</mx:horizontalAxisRenderers>
+	
+			<mx:verticalAxis>
+				<mx:LinearAxis id="vAxis" labelFunction="formatDays"  />
+			</mx:verticalAxis>
+	
+	        <mx:verticalAxisRenderers>
+	        	<mx:AxisRenderer axis="{vAxis}" showLabels="true" canDropLabels="false" />
+	        </mx:verticalAxisRenderers>
+	    
+	        <mx:series>
+	            <mx:BubbleSeries yField="w" xField="h" radiusField="count"  showDataEffect="{interpolateIn}" />
+	        </mx:series>
+	        
+	    </mx:BubbleChart>			
+	</mx:Panel>
+</mx:Canvas>

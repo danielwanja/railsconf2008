@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml"
+	title="Account List" 
+	width="200" height="300"
+	creationComplete="loadList()">
+<mx:Metadata>
+	[Event(name="accountSelected", type="events.AccountEvent")]
+</mx:Metadata>	
+<mx:Script>
+	<![CDATA[
+		import events.AccountEvent;
+		import data.TweetDataAggregator;
+		import data.FileDB;
+		import mx.collections.ArrayCollection;
+		[Bindable]
+		private var accountList:ArrayCollection;
+		
+		private function loadList():void {
+			var list:ArrayCollection = new ArrayCollection();
+			for each (var name:String in FileDB.accountNames()) {
+				var item:Object = {name:name, aggregation:new TweetDataAggregator(name)};
+				list.addItem(item);
+				FileDB.load(item.aggregation);
+			}
+			accountList = list; 
+		}
+		
+		private function tweetCount(item:Object, column:DataGridColumn):String {
+			return item.aggregation.getTweets().length;
+		}
+		private function accountSelected():void {
+		   var event:AccountEvent = new AccountEvent("accountSelected");
+		   event.account = 	grid.selectedItem.aggregation;
+		   dispatchEvent(event);
+		}
+	]]>
+</mx:Script>	
+<mx:HBox>
+	<mx:TextInput  width="117"/>
+	<mx:Button label="Load"/>
+</mx:HBox>	
+	<mx:DataGrid id="grid" dataProvider="{accountList}" width="100%" height="100%" change="accountSelected()">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Name" dataField="name" width="70"/>
+			<mx:DataGridColumn headerText="Tweets"  labelFunction="tweetCount" width="30" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+<mx:ControlBar>
+	<mx:Button label="-" click="" />
+</mx:ControlBar>
+</mx:Panel>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" >
+<mx:Script>
+	<![CDATA[
+		 private function formatLabel(data:Object, field:String, index:Number, percentValue:Number):String {
+		 	return data.key + "("+data.value+")"; 
+		 }
+	]]>
+</mx:Script>
+	<mx:ArrayCollection id="tweetsReplies"/>
+	<mx:Panel title="Top @Replies" width="100%" height="100%">
+		<mx:PieChart id="repliesChart" dataProvider="{tweetsReplies}" width="100%" height="100%">
+			<mx:series>
+	           <mx:PieSeries 
+	                field="value" 
+	                nameField="key" 
+	                labelFunction="formatLabel"
+	                labelPosition="insideWithCallout"
+	           />
+	        </mx:series>
+     </mx:PieChart>
+	</mx:Panel>
+</mx:Canvas>

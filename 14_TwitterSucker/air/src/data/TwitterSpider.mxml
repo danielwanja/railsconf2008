@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300">
+<mx:Metadata>
+	[Event(name="loaded")]
+</mx:Metadata>
+<mx:Script>
+	<![CDATA[
+		import data.HTMLParser;
+		import data.TweetDataAggregator;
+		
+		import mx.rpc.AsyncToken;
+		import mx.collections.ArrayCollection;
+		import mx.controls.Alert;
+		import mx.utils.ObjectUtil;
+		
+		import mx.rpc.events.FaultEvent;
+		import mx.rpc.events.ResultEvent;
+
+		private var cancel:Boolean=false;
+	
+		[Bindable]
+		private var user:String;
+
+		[Bindable]
+		private var tweetsToLoad:Number=0;
+
+	
+		[Bindable]
+		public var dataAggregator:TweetDataAggregator;
+		
+		private function loadFirstPage(user:String): void {
+			userField.errorString = "";
+			this.user = user;
+			cancel = false;
+			content.text = "Loading "+user+" ...";
+			if (dataAggregator==null) //FIXME: remove this
+			dataAggregator = new TweetDataAggregator(user);
+			tweetsToLoad = 0;
+			twitter.send();
+		}
+		private function loadPage(page:Number): void {
+			content.text = "Loading "+user+" page "+page+" ...";
+			var call:AsyncToken = twitter.send({page:page});
+			call.pageNumber = page;
+		}
+		private function pageLoaded(event:ResultEvent):void {
+			var stringHTML:String = event.result as String;
+			var parser:HTMLParser = new HTMLParser(stringHTML, event.token.pageNumber);
+			content.text =  "Updates:"+ parser.updates;
+			content.text += "\nPages:"+ parser.pageCount;
+			if (tweetsToLoad==0) {
+				tweetsToLoad = parser.updates;
+			}
+			var overlap:Boolean = dataAggregator.addTweets(parser.tweetsArray);
+			progress.setProgress(dataAggregator.getTweets().length, tweetsToLoad);
+			if (!overlap &&!cancel&&parser.hasNextPage) {
+				loadPage(parser.pageNumber+1);
+			} else {
+				trace("Overlap:"+overlap);
+				loadCompleted();
+			}	
+		}
+		private function loadCompleted():void {
+			dataAggregator.aggregate();
+			dispatchEvent(new Event("loaded"));
+		}
+		
+		private function pageDidntLoad(event:FaultEvent):void {
+			userField.errorString = event.fault.message; 
+		}		
+	]]>
+</mx:Script>
+<mx:HTTPService id="twitter"  
+				url="http://twitter.com/{user}"
+				resultFormat="text" 
+				result="pageLoaded(event)" fault="pageDidntLoad(event)"	/>
+	
+<mx:HBox>
+	<mx:TextInput id="userField"  text="danielwanja"/>
+	<mx:Button id="loadBtn" label="Load"  click="loadFirstPage(userField.text)"/>
+	<mx:Button label="Cancel" click="cancel=true" />
+</mx:HBox>
+<mx:ProgressBar id="progress"  mode="manual" label="Loading {tweetsToLoad} tweets: %3%% "/>
+<mx:TextArea id="content" width="100%" height="100%" />		
+</mx:VBox>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300">
+	<mx:ArrayCollection id="tweetsDayOfWeek"/>
+	<mx:ArrayCollection id="tweetsByHour"/>
+	<mx:ArrayCollection id="tweetsByMonth"/>
+	<mx:Panel width="33%" height="100%" title="By Month">
+	    <mx:ColumnChart id="c1" 
+	            height="100%" width="100%" 
+	            showDataTips="true" 
+	            dataProvider="{tweetsByMonth}"
+	        >                
+	            <mx:horizontalAxis>
+	                <mx:CategoryAxis categoryField="key"/>
+	            </mx:horizontalAxis>
+	                
+	            <mx:series>
+	                <mx:ColumnSeries 
+	                    xField="key" 
+	                    yField="value" 
+	                    displayName="Month"
+	                />
+	            </mx:series>
+	        </mx:ColumnChart>			
+	</mx:Panel>
+
+	<mx:Panel width="33%" height="100%" title="By Day Of Week">
+    <mx:ColumnChart id="c2" 
+            height="100%" width="100%" 
+            showDataTips="true" 
+            dataProvider="{tweetsDayOfWeek}"
+        >                
+            <mx:horizontalAxis>
+                <mx:CategoryAxis categoryField="key"/>
+            </mx:horizontalAxis>
+                
+            <mx:series>
+                <mx:ColumnSeries 
+                    xField="key" 
+                    yField="value" 
+                    displayName="Day Of Week"
+                />
+            </mx:series>
+        </mx:ColumnChart>
+	</mx:Panel>
+	
+	<mx:Panel width="33%" height="100%" title="By Hour">
+	    <mx:ColumnChart id="c3" 
+	            height="100%" 
+	            width="100%" 
+	            paddingLeft="5" 
+	            paddingRight="5" 
+	            showDataTips="true" 
+	            dataProvider="{tweetsByHour}"
+	        >                
+	            <mx:horizontalAxis>
+	                <mx:CategoryAxis categoryField="key"/>
+	            </mx:horizontalAxis>
+	                
+	            <mx:series>
+	                <mx:ColumnSeries 
+	                    xField="key" 
+	                    yField="value" 
+	                    displayName="By Hour"
+	                />
+	            </mx:series>
+	        </mx:ColumnChart>		
+	 </mx:Panel>       
+</mx:HBox>

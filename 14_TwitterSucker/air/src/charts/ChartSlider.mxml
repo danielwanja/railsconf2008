@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:mccune="com.dougmccune.controls.*"
+	backgroundColor="#FFFFFF">
+<mx:Metadata>
+  [Event(name="dateRangeChanged", type="events.DateRangeEvent")]
+</mx:Metadata>
+	<mx:Label text="From:{formatDataTip(slider.values[0])} To:{formatDataTip(slider.values[1])}" width="100%" fontWeight="bold" textAlign="center"/>
+	<mx:CartesianChart id="bigChart" showDataTips="true" dataProvider="{mainData}" width="100%" height="100%">
+		
+		<mx:horizontalAxis><mx:CategoryAxis id="bhAxis" categoryField="key"/></mx:horizontalAxis>
+        <mx:horizontalAxisRenderers><mx:AxisRenderer  axis="{bhAxis}" visible="false" /></mx:horizontalAxisRenderers>
+        <mx:verticalAxis><mx:LinearAxis  id="bvAxis" /></mx:verticalAxis>
+        <mx:verticalAxisRenderers><mx:AxisRenderer  axis="{bvAxis}" visible="false"/></mx:verticalAxisRenderers>
+        
+		<mx:series>
+			<mx:AreaSeries name="A" yField="value" areaFill="{new SolidColor(0x0033CC, 0.5)}"  areaStroke="{new Stroke(0x0033CC, 2)}" />
+	    </mx:series>
+	    
+	    <mx:annotationElements>
+	    	<mx:Canvas width="100%" height="100%" buttonMode="true" mouseDown="setMouseDown(bigChart)" />
+	    </mx:annotationElements>
+	    
+	</mx:CartesianChart>
+	
+	<mx:VBox verticalGap="0" width="100%" verticalScrollPolicy="off" horizontalAlign="right">
+		
+		<mx:CartesianChart id="smallChart" dataProvider="{chartData}" width="100%" height="100">
+			
+			<mx:horizontalAxis><mx:CategoryAxis id="hAxis" categoryField="key"/></mx:horizontalAxis>
+			<mx:horizontalAxisRenderers><mx:AxisRenderer  axis="{hAxis}" visible="false" showLabels="false" /></mx:horizontalAxisRenderers>
+	        <mx:verticalAxis><mx:LinearAxis id="vAxis" /></mx:verticalAxis>
+	        <mx:verticalAxisRenderers><mx:AxisRenderer axis="{vAxis}" visible="false"  showLabels="false"/></mx:verticalAxisRenderers>
+	        
+			<mx:series>
+				<mx:AreaSeries name="A" yField="value" areaStroke="{new Stroke(0x0033CC, 2)}" areaFill="{new SolidColor(0x0033CC, 0.5)}" />
+		    </mx:series>
+		    
+         <mx:annotationElements>
+                <mx:HDividedBox id="overlayCanvas" width="100%" alpha="1" dividerAffordance="5" liveDragging="true" horizontalGap="10" verticalGap="0" horizontalScrollPolicy="off" 
+                                dividerDrag="updateBoundariesFromDivider(event)" dividerSkin="{blankDividerClass}"
+                                mouseOver="overlayCanvas.setStyle('dividerSkin', dividerClass);" mouseOut="overlayCanvas.setStyle('dividerSkin', blankDividerClass);">
+                    <mx:Canvas id="leftBox" height="100%"
+                               width="{(overlayCanvas.width / chartData.length) * leftBoundary}" 
+                               backgroundAlpha="0.8" backgroundColor="#EEEEEE" borderThickness="1" borderColor="#999999" borderStyle="solid" />
+                    <mx:Canvas id="visibleBox" width="100%" height="100%" buttonMode="true" mouseDown="setMouseDown(smallChart)" />
+                    <mx:Canvas id="rightBox" height="100%" 
+                               width="{(overlayCanvas.width / chartData.length) * (chartData.length - rightBoundary)}" 
+                               backgroundAlpha="0.8" backgroundColor="#EEEEEE" borderThickness="1" borderColor="#999999" borderStyle="solid"/>
+                </mx:HDividedBox>
+            </mx:annotationElements>
+		</mx:CartesianChart>
+		<mx:Spacer height="-30" />
+		<mccune:HSlider id="slider" width="{overlayCanvas.width}" height="25"
+	                    trackHighlightSkin="com.dougmccune.skins.SliderThumbHighlightSkin"
+	                    allowTrackClick="true" allowThumbOverlap="false" 
+	                    liveDragging="true" change="updateBoundariesFromSlider()"
+	                    showDataTip="true" dataTipPlacement="bottom" dataTipOffset="3"  dataTipFormatFunction="formatDataTip"
+	                    showTrackHighlight="true"
+	                    thumbCount="2" snapInterval="1"
+	                    values="{[leftBoundary, rightBoundary]}"
+	                    minimum="0" maximum="{chartData.length - 1}"
+	                	/>
+	</mx:VBox>
+	<mx:DateFormatter id="dateFormatter" formatString="MMM.DD.YY" />
+	<mx:Script>
+		<![CDATA[
+			import events.DateRangeEvent;
+			
+			import mx.managers.SystemManager;
+			import mx.events.ResizeEvent;
+			import mx.graphics.Stroke;
+        	import mx.graphics.SolidColor;
+        	import mx.collections.ArrayCollection;
+        	import mx.events.DividerEvent;
+        	import mx.managers.SystemManager;
+			
+			[Embed(source="divider.png")] [Bindable] public var dividerClass:Class;
+			[Embed(source="blank.png")] [Bindable] public var blankDividerClass:Class;
+			
+			
+			[Bindable] public var chartData:ArrayCollection;
+			[Bindable] public var mainData:ArrayCollection;
+			
+			[Bindable] private var leftBoundary:Number;
+			[Bindable] private var rightBoundary:Number;
+			
+			private var staticLeftBoundary:Number;
+			private var staticRightBoundary:Number;
+			
+			public var smallDrag:Boolean = false;
+			public var bigDrag:Boolean = false;
+			public var mouseXRef:Number;
+			
+			public function setChartData(newData:Array): void {
+				chartData = new ArrayCollection(newData);		
+                mainData = new ArrayCollection(chartData.source);
+                leftBoundary = mainData.length>30 ? mainData.length-31 : 0;
+                rightBoundary = mainData.length;
+                updateBoundariesFromSlider();
+			}
+						
+			private function updateBoundariesFromSlider():void
+			{
+				leftBoundary = slider.values[0];
+				rightBoundary = slider.values[1];
+				updateMainData();
+			}
+			
+			private function updateBoundariesFromDivider(event:DividerEvent):void
+			{
+				leftBoundary = Math.abs(HDividedBox(event.target).getChildAt(0).width / (event.target.width / chartData.length));
+				rightBoundary = Math.abs(chartData.length - (HDividedBox(event.target).getChildAt(2).width / (event.target.width / chartData.length)));
+				updateMainData();
+			}
+			
+			private function updateMainData():void
+			{
+				mainData.source = chartData.source.slice(leftBoundary, rightBoundary);
+				if (chartData.length>0)
+						dispatchEvent(new DateRangeEvent("dateRangeChanged", 
+													chartData.getItemAt(leftBoundary).key,
+													chartData.getItemAt(Math.min(chartData.length-1, rightBoundary-1)).key));
+			}
+
+			private function setMouseDown(theChart:CartesianChart):void
+			{
+				mouseXRef = this.mouseX;
+				staticLeftBoundary = leftBoundary;
+				staticRightBoundary = rightBoundary;
+				if(theChart == bigChart) bigDrag = true;
+				if(theChart == smallChart) smallDrag = true;
+				this.systemManager.addEventListener(MouseEvent.MOUSE_MOVE, moveChart);
+				this.systemManager.addEventListener(MouseEvent.MOUSE_UP, stopDragging);
+			}
+			
+			private function stopDragging(event:MouseEvent):void
+			{
+				smallDrag = false;
+				bigDrag = false;
+				this.systemManager.removeEventListener(MouseEvent.MOUSE_MOVE, moveChart);
+				this.systemManager.removeEventListener(MouseEvent.MOUSE_UP, stopDragging);
+			}
+			
+			private function moveChart(event:MouseEvent):void
+			{
+				if(bigDrag)
+				{
+					leftBoundary = staticLeftBoundary + (mouseXRef - this.mouseX) / (bigChart.width / mainData.length);
+					rightBoundary = staticRightBoundary + (mouseXRef - this.mouseX) / (bigChart.width / mainData.length);
+				}
+				else if(smallDrag)
+				{
+					leftBoundary = staticLeftBoundary - (mouseXRef - this.mouseX) / (smallChart.width / chartData.length);
+					rightBoundary = staticRightBoundary - (mouseXRef - this.mouseX) / (smallChart.width / chartData.length);
+				}
+			}
+			
+			private function formatDataTip(val:Object):String {
+				var time:Number = Number(chartData.getItemAt(Number(val)).key);
+				var date:Date = new Date(time);
+				return dateFormatter.format(date);
+            }
+
+		]]>
+	</mx:Script>
+		
+</mx:VBox>
