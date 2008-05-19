@@ -52,24 +52,6 @@
 				}
 			}
 			
-			/* This function gets called whenever the graph's current item changes,
-			 * or when our data changes, to calculate a color based on our distance
-			 * from the current item. 
-			 */
-			 /* backgroundColor="{calcColor(app().roamer.currentItem, data as Item)}"
-			 
-			private function calcColor(currentItem: Item, item: Item): int {
-				switch (app().roamer.distance(currentItem, item)) {
-					case 0:
-						return 0x5555ee;
-					//default:
-					case 1:
-						return 0x7777bb;
-					default:
-						return 0x999999;
-				}
-			}
-			*/
 		]]>
 	</mx:Script>				
 </mx:HBox>

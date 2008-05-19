@@ -1,112 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel 
-	xmlns:mx="http://www.adobe.com/2006/mxml"
-	title="Recorder" 
-	layout="vertical" 
-	width="360" height="352">
-	<mx:states>
-		<mx:State name="recording">
-			<mx:SetProperty target="{btn}" name="label" value="Stop"/>
-			<mx:SetEventHandler target="{btn}" name="click" handler="stopRecording()"/>
-		</mx:State>
-	</mx:states>
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    title="Recorder" 
+    layout="vertical" 
+    width="360" height="352">
+    <mx:states>
+        <mx:State name="recording">
+            <mx:SetProperty target="{btn}" name="label" value="Stop"/>
+            <mx:SetEventHandler target="{btn}" name="click" handler="stopRecording()"/>
+        </mx:State>
+    </mx:states>
 <mx:UIComponent id="recorder" width="320" height="240" />
-	<mx:Button label="Record" id="btn" click="record()"/>
-	<mx:ProgressBar id="soundLevel" label="Sound Level" mode="manual" labelPlacement="right" enabled="true" progress="{microphone.activityLevel}"/>
-<!--	<mx:HSlider id="gain" liveDragging="true" change="microphone.gain=gain.value" minimum="0" maximum="100" value="60" /> -->
-	
+    <mx:Button label="Record" id="btn" click="record()"/>
+    <mx:ProgressBar id="soundLevel" label="Sound Level" mode="manual" labelPlacement="right" enabled="true" progress="{microphone.activityLevel}"/>
+<!--    <mx:HSlider id="gain" liveDragging="true" change="microphone.gain=gain.value" minimum="0" maximum="100" value="60" /> -->
+    
 <mx:Script>
-	<![CDATA[
-		import flash.media.Video;
-		import mx.controls.Alert;
-		import flash.events.Event;
-	    import flash.events.StatusEvent;
-		
-		[Bindable]
+    <![CDATA[
+        import flash.media.Camera;
+        import flash.media.Video;
+        import flash.media.Microphone;
+        import flash.net.NetConnection;
+        import flash.net.NetStream;
+        
+        import mx.controls.Alert;
+        import flash.events.Event;
+        import flash.events.StatusEvent;
+        
+        [Bindable]
         public var camera:Camera;
         
         [Bindable]
         public var microphone:Microphone;
         
-		public var video:Video
-		
-		
-		public function prepare():void {			
-		   camera = Camera.getCamera();
-		   if (camera==null) {
-		   	  mx.controls.Alert('Camera not found. @TODO: implement camera chooser.');
-		   	  return;
-		   }
-		   microphone = flash.media.Microphone.getMicrophone();
-		   Security.showSettings(SecurityPanel.MICROPHONE);
-		   
-		   if (microphone==null){
-		   	  mx.controls.Alert('Micorphone not found. @TODO: implement camera chooser.');
-		   	  return;
-		   } else {
-			  microphone.addEventListener(StatusEvent.STATUS, this.onMicStatus);
-			  microphone.gain = 70;
-			  microphone.rate = 11;
-			  //microphone.setUseEchoSuppression(true);
-			  //microphone.setLoopBack(true);
-			  microphone.setSilenceLevel(1,100);
-				
-			  microphone.addEventListener(ActivityEvent.ACTIVITY, this.onMicActivity);
-			  microphone.addEventListener(StatusEvent.STATUS, this.onMicStatus);
+        public var video:Video
+        
+        
+        public function prepare():void {            
+           camera = Camera.getCamera();
+           if (camera==null) {
+                 mx.controls.Alert('Camera not found. @TODO: implement camera chooser.');
+                 return;
+           }
+           microphone = flash.media.Microphone.getMicrophone();
+           Security.showSettings(SecurityPanel.MICROPHONE);
+           
+           if (microphone==null){
+                 mx.controls.Alert('Micorphone not found. @TODO: implement camera chooser.');
+                 return;
+           } else {
+              microphone.addEventListener(StatusEvent.STATUS, this.onMicStatus);
+              microphone.gain = 70;
+              microphone.rate = 11;
+              //microphone.setUseEchoSuppression(true);
+              //microphone.setLoopBack(true);
+              microphone.setSilenceLevel(1,100);
+                
+              microphone.addEventListener(ActivityEvent.ACTIVITY, this.onMicActivity);
+              microphone.addEventListener(StatusEvent.STATUS, this.onMicStatus);
 
-		   }
-		   trace("@@@microphone:"+microphone);
-		   		   
-		   camera.setMode(320, 240, 15); // 320x240 15fps
-		   video = new Video(camera.width, camera.height);
-		   video.attachCamera(camera);
-		   recorder.addChild(video);
-		}
+           }
+           trace("@@@microphone:"+microphone);
+                      
+           camera.setMode(320, 240, 15); // 320x240 15fps
+           video = new Video(camera.width, camera.height);
+           video.attachCamera(camera);
+           recorder.addChild(video);
+        }
 
-		
-		private function onMicActivity(event:ActivityEvent):void
-		{
-		    trace("activating=" + event.activating + ", activityLevel=" + 
-		        microphone.activityLevel);
-		    soundLevel.setProgress(microphone.activityLevel, 100);
-		}
-		
-		private function onMicStatus(event:StatusEvent):void
-		{
-		    trace("status: level=" + event.level + ", code=" + event.code);
-		}
-		
+        
+        private function onMicActivity(event:ActivityEvent):void
+        {
+            trace("activating=" + event.activating + ", activityLevel=" + 
+                microphone.activityLevel);
+            soundLevel.setProgress(microphone.activityLevel, 100);
+        }
+        
+        private function onMicStatus(event:StatusEvent):void
+        {
+            trace("status: level=" + event.level + ", code=" + event.code);
+        }
+        
 
-		private var nc:NetConnection;	
-		private var ns:NetStream;
-		public function record():void {
-			nc = new NetConnection();
-			nc.connect("rtmp://localhost");
-			nc.addEventListener (NetStatusEvent.NET_STATUS,connected);
-			trace("@@connecting...");
-		}
-		private function connected(event:NetStatusEvent):void {
-			if (event.info.code!="NetConnection.Connect.Success") {
-				mx.controls.Alert.show(event.info.toString(), "Recorder failed to connect to server.");
-				nc = null;
-				return;
-			}
-			trace("@@recording...");
-			ns = new NetStream(nc);
-			ns.attachAudio (microphone); 
-			ns.attachCamera (camera);
-			ns.publish("myrecording.flv","record"); // FIXME: add name selection per user	
-			currentState = 'recording';		
-			
-		}
-		
-		public function stopRecording():void {
-			ns.close();
-			ns = null;
-			nc = null;
-			currentState = '';
-		}
-		
-	]]>
-</mx:Script>	
+        private var nc:NetConnection;    
+        private var ns:NetStream;
+        public function record():void {
+            nc = new NetConnection();
+            nc.connect("rtmp://localhost");
+            nc.addEventListener (NetStatusEvent.NET_STATUS,connected);
+            trace("@@connecting...");
+        }
+        private function connected(event:NetStatusEvent):void {
+            if (event.info.code!="NetConnection.Connect.Success") {
+                mx.controls.Alert.show(event.info.toString(), "Recorder failed to connect to server.");
+                nc = null;
+                return;
+            }
+            trace("@@recording...");
+            ns = new NetStream(nc);
+            ns.attachAudio (microphone); 
+            ns.attachCamera (camera);
+            ns.publish("myrecording.flv","record"); // FIXME: add name selection per user    
+            currentState = 'recording';        
+            
+        }
+        
+        public function stopRecording():void {
+            ns.close();
+            ns = null;
+            nc = null;
+            currentState = '';
+        }
+        
+    ]]>
+</mx:Script>    
 </mx:Panel>

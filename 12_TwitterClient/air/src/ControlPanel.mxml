@@ -23,7 +23,7 @@
         liveDragging="true" snapInterval="1" height="25"/>
     <mx:Text x="10" y="10" text="Roamer Component Demo" fontSize="12" color="#dddddd" fontWeight="bold"/>
     <mx:Text x="10" y="68" text="no data loaded" id="infoText" fontSize="9" color="#dddddd" width="224"/>
-    <mx:Text x="10" y="92" id="help" fontSize="9" color="#ffff00"/><!-- text="Click a button to load some data"  -->
+    <mx:Text x="10" y="92" id="help" fontSize="9" color="#ffff00" width="234"/><!-- text="Click a button to load some data"  -->
     <mx:Label visible="false" x="9" y="443" text="motion stop threshold" fontSize="9" width="133" textAlign="center" color="#dddddd"/>
     <mx:HSlider visible="false" x="9" y="429" width="133" id="motionThreshold" value="{roamer.motionThreshold}" minimum="0.01" maximum="2" liveDragging="true"/>
     <mx:Label x="150" y="121" text="*" color="#dddddd" id="currentDataIndicator"/>	

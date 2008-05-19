@@ -5,7 +5,6 @@
 <mx:Script>
 	<![CDATA[
 	import mx.graphics.codec.PNGEncoder;
-	import mx.core.BitmapAsset;
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.core.UIComponent;
@@ -39,14 +38,14 @@
 	}			     
 	
 	public function sendToServer(event:Event):void {
-		// 1. convert to Png
-		var pngEncoder:PNGEncoder = new PNGEncoder();
-        var bytes:ByteArray = pngEncoder.encode(event.currentTarget.data.bitmapData);
-        // 2. send to server
-		var loader:URLLoader = new URLLoader();               
-        loader.addEventListener(Event.COMPLETE,sendComplete);
-        loader.dataFormat = URLLoaderDataFormat.BINARY;
-        loader.load(MultiPartRequestData.getRequest("http://localhost:3000/photos", bytes));
+    // 1. convert to Png
+    var pngEncoder:PNGEncoder = new PNGEncoder();
+    var bytes:ByteArray = pngEncoder.encode(event.currentTarget.data.bitmapData);
+    // 2. send to server
+    var loader:URLLoader = new URLLoader();               
+    loader.addEventListener(Event.COMPLETE,sendComplete);
+    loader.dataFormat = URLLoaderDataFormat.BINARY;
+    loader.load(MultiPartRequestData.getRequest("http://localhost:3000/photos", bytes));
 	}
 
 	public function sendComplete (e: Event):void {

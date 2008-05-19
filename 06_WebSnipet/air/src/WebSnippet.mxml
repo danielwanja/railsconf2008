@@ -46,7 +46,7 @@ Todo:  	- remove highlight while loading
 				
 		private var highlighter:Sprite;
 		private function setupHighlighter():void {
-			highlighter = new Sprite();
+			    highlighter = new Sprite();
 	        highlighter.mouseEnabled =  false; // click goes behind
 	        highlighter.buttonMode = true;
 	        highlighter.contextMenu = appMenu;	   
