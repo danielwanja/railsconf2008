@@ -4,13 +4,29 @@
 	Then provides stats
 	
 	Todo:
+		Application
+			display loading at startup
+		TwitterSpider
+			upon load showStats and refresh accountList tweet count
+			progress bar not updated correctly
+			allow concurent spider or 'freeze' ui
+			when failure loading 'older' page, cannot resume.
 		Account
-			If list clicked  update input box
-			If name enter is in list Button=Refresh else Button=Load
-			Delete name (delete from list+remove file)
+			Add (All) make super aggregation
+			A Refresh All functionality
+			Make tweets sort numeric
+	    Tweets
+	    	Format Date Column (MMM.DD.YY HH:MM:SS)
+	    	Add Filter
+		Stats+Tweets
+			Add Header (with time range)
+			ChartSlider update stats and tweets (filter remains)			
+	    
+	    		
 		Fix bigChart/smallChart drag&drop issue
 		incrementally update (if saved data exists)
 		adapt time zone to user time zone
+		
 	Inspired by:
 	    http://www.xefer.com/twitter
 		http://www.stretchmedia.ca/code_examples/chart_range_selection/main.html
@@ -21,7 +37,8 @@
 	xmlns:charts="charts.*" 
 	xmlns:data="data.*" 
 	xmlns:account="account.*"
-	layout="vertical" defaultButton="{loader.loadBtn}" xmlns:local="*">
+	xmlns:tweetList="tweetList.*"
+	layout="vertical" xmlns:local="*">
 <mx:Script>
 	<![CDATA[
 		import data.TweetDataAggregator;
@@ -29,12 +46,19 @@
 		
 		[Bindable]
 		private var dataAggregator:TweetDataAggregator;
+				
+		private function filterByDates(fromDate:Number, toDate:Number):void {
+			dataAggregator.aggregateForDateRange(fromDate, toDate);
+		}
+		
+		private function accountSelected(selectedAccount:Object):void {
+			dataAggregator=selectedAccount as TweetDataAggregator; 
+			if (view.selectedIndex==0) view.selectedIndex=2;
+			showStats();
+		}
 		
 		private function showStats():void {
 			fullChart.setChartData(dataAggregator.tweetsPerDay.source);
-			updateCharts();
-		}			
-		private function updateCharts():void {
 			replyChart.tweetsReplies=dataAggregator.tweetsReplies;
 			hoursAndDayChart.tweetsHourAndDay=dataAggregator.tweetsHourAndDay;
 			dwmChart.tweetsDayOfWeek=dataAggregator.tweetsDayOfWeek;
@@ -42,68 +66,23 @@
 			dwmChart.tweetsByHour=dataAggregator.tweetsByHour;
 		}
 		
-		private function filterByDates(fromDate:Number, toDate:Number):void {
-			dataAggregator.aggregateForDateRange(fromDate, toDate);
-		}
-		
-		private function loadData():void {
-			var file:File = File.documentsDirectory;
-			file = file.resolvePath("TwitterSucker/testFile.txt");
-			var fileStream:FileStream = new FileStream();
-			fileStream.open(file, FileMode.READ);
-			try {
-				var tweets:Array = fileStream.readObject();
-				trace("loaded :"+tweets.length);
-				var newDa:TweetDataAggregator = new TweetDataAggregator('test');
-				newDa.setTweets(tweets);
-				dataAggregator = newDa; //Force binding
-			} finally {
-				fileStream.close();
-			}				
-		}
-		
-		private function saveData():void {
-			var tweets:Array = dataAggregator.getTweets();
-			var file:File = File.documentsDirectory;
-			file = file.resolvePath("TwitterSucker/testFile.txt");
-			var fileStream:FileStream = new FileStream();
-			fileStream.open(file, FileMode.WRITE);
-			try {
-				fileStream.writeObject(tweets);
-			} finally {
-				fileStream.close();
-			}	
-
-
-		}		
-		
-		private function accountSelected(selectedAccount:Object):void {
-			dataAggregator=selectedAccount as TweetDataAggregator; 
-			if (view.selectedIndex==0) view.selectedIndex=2;
-			showStats();
-		}
+		private function loadAccount(aggregator:TweetDataAggregator):void {
+			dataAggregator=aggregator;
+			view.selectedIndex = 0; 
+			loader.load(dataAggregator);
+		}				
 	]]>
 </mx:Script>
-<mx:HBox>
-	<mx:Button label="show Stats" click="showStats()" />
-	<mx:Button label="save" click="saveData()" />
-	<mx:Button label="load" click="loadData()" />
-</mx:HBox>
 <mx:HDividedBox width="100%" height="100%">
-	<account:AccountList width="200" height="100%"  accountSelected="accountSelected(event.account);" />
+	<account:AccountList width="230" height="100%"  
+		accountSelected="accountSelected(event.account);" 
+		loadAccount="loadAccount(event.account as TweetDataAggregator)"/>
 	<mx:TabNavigator id="view" width="100%" height="100%" creationPolicy="all">
 		<data:TwitterSpider id="loader" width="100%"  height="100%" label="Progress" 
 					loaded="dataAggregator=loader.dataAggregator; view.selectedIndex=2" />
-		<mx:VBox width="100%" height="100%" label="Tweets ({dataAggregator.getTweets().length})">
-			<mx:DataGrid width="100%" height="100%" dataProvider="{dataAggregator.getTweets()}">
-				<mx:columns>
-					<mx:DataGridColumn headerText="Time" dataField="time"/>
-					<mx:DataGridColumn headerText="Message" dataField="message"/>
-					<mx:DataGridColumn headerText="Client" dataField="client"/>
-					<mx:DataGridColumn headerText="In Reply" dataField="in_reply_to"/>
-				</mx:columns>
-			</mx:DataGrid>
-		</mx:VBox>
+		<tweetList:TweetList label="Tweets ({dataAggregator.getTweets().length})" 
+							 tweets="{dataAggregator.getTweets()}"
+							 width="100%" height="100%" />	    					
 		<mx:VBox width="100%" height="100%" label="Stats" creationPolicy="all">
 			<mx:HBox width="100%" height="33%">
 				<charts:ReplyChart id="replyChart" width="50%" height="100%" />

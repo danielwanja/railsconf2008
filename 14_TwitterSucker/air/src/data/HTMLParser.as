@@ -31,7 +31,6 @@ package data
 			return _html.indexOf('class="section_links" rel="prev">Older &#187;</a>')>-1;
 		}
 		public function get pageNumber():Number {
-			trace("pageNumber:"+_pageNumber);
 			return _pageNumber;
 		}
 		

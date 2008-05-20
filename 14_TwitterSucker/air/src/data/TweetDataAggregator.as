@@ -34,12 +34,10 @@ package data
 		 * Add tweets. Allow to add incrementally tweets.
 		 */
 		public function addTweets(tweets:Array):Boolean {
-			//this.tweets = tweets.concat(this.tweets);
 			var overlap:Boolean = false;
 			for each (var tweet:Object in tweets) {
 				if (ids[tweet.id] != null) {
 					overlap = true;
-					trace("@@DUPLICATE:"+tweet.id);
 				} else {
 					ids[tweet.id] = tweet;
 					this.tweets.push(tweet);
@@ -47,12 +45,14 @@ package data
 			}
 			return overlap;
 		}
+		
+		
 		public function getTweets():Array {
 			return tweets;
 		}
 		public function setTweets(tweets:Array):void {
 			this.tweets = tweets;
-			aggregate();
+			aggregate(); // resets ids
 		}
 		private function idRange(tweets:Array):Array {
 			if (tweets.length>1) {
@@ -67,7 +67,7 @@ package data
 			var agg:Object = getAggregationStructure();
 			for each (var tweet:Object in tweets) {
 				if (tweet.time_breakdown==null) tweet.time_breakdown = timeBreakdown(tweet.time);
-
+				if (ids[tweet.id] == null) ids[tweet.id] = tweet;
 				increment(agg.tweetsPerDay, tweet.time_breakdown.date);
 				increment(agg.tweetsDayOfWeek, tweet.time_breakdown.w);
 				increment(agg.tweetsDateOfMonth, tweet.time_breakdown.d);

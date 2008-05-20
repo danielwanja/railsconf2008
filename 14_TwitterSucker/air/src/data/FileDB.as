@@ -27,14 +27,13 @@ package data
 			return results;
 		}
 		static public function load(aggregator:TweetDataAggregator):void {
-			trace("Reading:"+aggregator.accountName);
 			var file:File = File.documentsDirectory;			
 			file = file.resolvePath("TwitterSucker/"+aggregator.accountName+".dat");
 			var fileStream:FileStream = new FileStream();
 			fileStream.open(file, FileMode.READ);
 			try {
+				fileStream.readObject(); //Should reset aggregator accountName
 				var tweets:Array = fileStream.readObject();
-				trace("loaded :"+tweets.length);
 				aggregator.setTweets(tweets);
 			} finally {
 				fileStream.close();
@@ -54,5 +53,11 @@ package data
 				fileStream.close();
 			}				
 		}
+		
+		static public function remove(aggregator:TweetDataAggregator):void {
+			var file:File = File.documentsDirectory;
+			file = file.resolvePath("TwitterSucker/"+aggregator.accountName+".dat");
+			file.deleteFile();
+		}		
 	}
 }

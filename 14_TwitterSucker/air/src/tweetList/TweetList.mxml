@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300">
+<mx:Script>
+	<![CDATA[
+		import mx.collections.ArrayCollection;
+		[Bindable]
+		public var tweets:Array;
+	]]>
+</mx:Script>	
+			<mx:DataGrid width="100%" height="100%" dataProvider="{tweets}">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Time" dataField="time"/>
+					<mx:DataGridColumn headerText="Message" dataField="message">
+							<mx:itemRenderer>
+							<mx:Component><mx:HTML htmlText="{String(data.message)}" horizontalScrollPolicy="off"/></mx:Component>
+							</mx:itemRenderer>						
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="Client" dataField="client"/>
+					<mx:DataGridColumn headerText="In Reply" dataField="in_reply_to"/>
+				</mx:columns>
+			</mx:DataGrid>
+
+</mx:Canvas>

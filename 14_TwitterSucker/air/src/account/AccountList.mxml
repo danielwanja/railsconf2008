@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml"
 	title="Account List" 
-	width="200" height="300"
+	width="228" height="300"
+	defaultButton="{loadBtn}"
 	creationComplete="loadList()">
 <mx:Metadata>
 	[Event(name="accountSelected", type="events.AccountEvent")]
+	[Event(name="loadAccount", type="events.AccountEvent")]
 </mx:Metadata>	
 <mx:Script>
 	<![CDATA[
@@ -25,27 +27,57 @@
 			accountList = list; 
 		}
 		
-		private function tweetCount(item:Object, column:DataGridColumn):String {
+		private function formatTweetCountLabel(item:Object, column:DataGridColumn):String {
 			return item.aggregation.getTweets().length;
 		}
 		private function accountSelected():void {
 		   var event:AccountEvent = new AccountEvent("accountSelected");
 		   event.account = 	grid.selectedItem.aggregation;
+		   accountName.text = event.account.accountName;
+		   checkName();
 		   dispatchEvent(event);
+		}
+		private function deleteAccount():void {
+			var item:Object = accountList.removeItemAt(accountList.getItemIndex(grid.selectedItem));
+			FileDB.remove(item.aggregation);
+			nameInList = false;
+		}
+		private function loadAccount():void {
+			var event:AccountEvent = new AccountEvent("loadAccount");
+			if (nameInList) {
+				event.account = findAccountForName(accountName.text).aggregation;												
+			} else {
+				var item:Object = {name:accountName.text, aggregation:new TweetDataAggregator(accountName.text)};
+				accountList.addItem(item);
+				event.account = item.aggregation;
+			}
+			dispatchEvent(event);
+		}
+
+		[Bindable] private var nameInList:Boolean = false;		
+		private function checkName():void {
+			nameInList =  findAccountForName(accountName.text)!=null;
+		}
+		
+		private function findAccountForName(name:String):Object {
+			for each (var anAccount:Object in accountList) {
+				if (anAccount.name == name) return anAccount;
+			}
+			return null;
 		}
 	]]>
 </mx:Script>	
 <mx:HBox>
-	<mx:TextInput  width="117"/>
-	<mx:Button label="Load"/>
+	<mx:TextInput id="accountName" width="117" change="checkName()"/>
+	<mx:Button id="loadBtn" label="{nameInList? 'Refresh' : 'Load'}"  click="loadAccount()"/>
 </mx:HBox>	
 	<mx:DataGrid id="grid" dataProvider="{accountList}" width="100%" height="100%" change="accountSelected()">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Name" dataField="name" width="70"/>
-			<mx:DataGridColumn headerText="Tweets"  labelFunction="tweetCount" width="30" textAlign="right"/>
+			<mx:DataGridColumn headerText="Tweets"  labelFunction="formatTweetCountLabel" width="30" textAlign="right"/>
 		</mx:columns>
 	</mx:DataGrid>
 <mx:ControlBar>
-	<mx:Button label="-" click="" />
+	<mx:Button label="-" click="deleteAccount()" />
 </mx:ControlBar>
 </mx:Panel>
