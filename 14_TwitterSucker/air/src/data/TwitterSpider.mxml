@@ -5,6 +5,7 @@
 </mx:Metadata>
 <mx:Script>
 	<![CDATA[
+		import mx.events.CloseEvent;
 		import data.HTMLParser;
 		import data.TweetDataAggregator;
 		
@@ -34,14 +35,18 @@
 			content.text = "Loading "+user+" ...";
 			dataAggregator = aggregator;
 			tweetsToLoad = 0;
+			progress.setProgress(0,100);
 			twitter.send();
+trace("Starting");			
 		}
 		private function loadPage(page:Number): void {
 			content.text = "Loading "+user+" page "+page+" ...";
 			var call:AsyncToken = twitter.send({page:page});
 			call.pageNumber = page;
+trace("Page:"+page);			
 		}
 		private function pageLoaded(event:ResultEvent):void {
+trace("Page loaded:"+event.token.pageNumber);			
 			var stringHTML:String = event.result as String;
 			var parser:HTMLParser = new HTMLParser(stringHTML, event.token.pageNumber);
 			content.text =  "Updates:"+ parser.updates;
@@ -59,18 +64,35 @@
 			}	
 		}
 		private function loadCompleted():void {
+trace("Done")			
 			dataAggregator.aggregate();
 			FileDB.save(dataAggregator);
 			dispatchEvent(new Event("loaded"));
 		}
 		
+		private var currentPage:Number;
 		private function pageDidntLoad(event:FaultEvent):void {
-			// Let's save what is loaded so far
-			dataAggregator.aggregate();
-			FileDB.save(dataAggregator);
-			mx.controls.Alert.show(event.fault.message); 
-			//FIXME: ask if should retry
+trace("Page failed:"+event.token.pageNumber);						
+			currentPage = event.token.pageNumber;
+trace("Error detail\t:"+event.fault.faultDetail);
+trace("Error root cause\t:"+event.fault.rootCause);
+trace("Error name\t:"+event.fault.name);
+trace("Error fault string\t:"+event.fault.faultString);
+trace("Error fault code\t:"+event.fault.faultCode);
+
+			Alert.show(event.fault.message, "Issue accessing Twitter. Retry?", 
+						Alert.YES|Alert.NO, null, retryLoadAnswer, null, Alert.YES ); 
 		}		
+		
+		private function retryLoadAnswer(eventObj:CloseEvent):void {
+            if (eventObj.detail==Alert.YES) {
+               loadPage(currentPage);
+            } else {
+				// Let's save what is loaded so far
+				dataAggregator.aggregate();
+				FileDB.save(dataAggregator);            	
+            }
+		}
 	]]>
 </mx:Script>
 <mx:HTTPService id="twitter"  

@@ -44,8 +44,7 @@ package data
 				}
 			}
 			return overlap;
-		}
-		
+		}		
 		
 		public function getTweets():Array {
 			return tweets;
@@ -164,9 +163,10 @@ package data
 			var m:Number = Number(parts[1]);
 			var d:Number = Number(parts[2]);
 			var h:Number = Number(parts[3]);
-			var dt:Date = new Date(y,m-1,d); 
+			var dt:Date = new Date(y,m-1,d);
+			var dateAndTime:Date = new Date(y,m-1,d, h, parts[4], parts[5]);
 			var w:Number = dt.getDay();
-			return {dateid:y+"#"+m+"#"+d, date:dt.time, y:y, m:m, d:d, h:h, w:w}
+			return {dateandtime:dateAndTime, date:dt.time, y:y, m:m, d:d, h:h, w:w}
 		}
 	}
 }

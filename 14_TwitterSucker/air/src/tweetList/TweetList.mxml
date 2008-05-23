@@ -1,23 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300">
 <mx:Script>
 	<![CDATA[
+		import mx.controls.dataGridClasses.DataGridColumn;
 		import mx.collections.ArrayCollection;
 		[Bindable]
-		public var tweets:Array;
+		public var tweets:ArrayCollection;
+		
+		private var searchTerm:String;
+		public function filter():void {
+			searchTerm = search.text;
+			tweets.filterFunction = searchTerm.length>0 ? tweetFilter : null; 
+			tweets.refresh();
+		}
+		
+		private function tweetFilter(tweet:Object):Boolean {
+			return tweet.message.indexOf(searchTerm)>0;
+		}
+		
+		private function dateLabel(item:Object, col:DataGridColumn):String {
+			var d = item.time_breakdown.dateandtime;
+			var e = dtFormatter.format(item.time_breakdown.dateandtime)
+			return item.time_breakdown ? dtFormatter.format(item.time_breakdown.dateandtime) : "";
+		}
 	]]>
 </mx:Script>	
-			<mx:DataGrid width="100%" height="100%" dataProvider="{tweets}">
-				<mx:columns>
-					<mx:DataGridColumn headerText="Time" dataField="time"/>
-					<mx:DataGridColumn headerText="Message" dataField="message">
-							<mx:itemRenderer>
-							<mx:Component><mx:HTML htmlText="{String(data.message)}" horizontalScrollPolicy="off"/></mx:Component>
-							</mx:itemRenderer>						
-					</mx:DataGridColumn>
-					<mx:DataGridColumn headerText="Client" dataField="client"/>
-					<mx:DataGridColumn headerText="In Reply" dataField="in_reply_to"/>
-				</mx:columns>
-			</mx:DataGrid>
+	<mx:TextInput id="search" change="filter()" />
+	<mx:DateFormatter id="dtFormatter"  formatString="MMM.DD.YY HH:NN:SS" />
+	<mx:DataGrid width="100%" height="100%" dataProvider="{tweets}" rowHeight="30"> 
+		<mx:columns>
+			<mx:DataGridColumn headerText="Time" labelFunction="dateLabel" />
+			<mx:DataGridColumn headerText="Message" dataField="message" width="750"  >
+					<mx:itemRenderer>
+						<mx:Component>
+							<mx:HTML htmlText="{data.message}" horizontalScrollPolicy="off" 
+									paintsDefaultBackground="false" backgroundAlpha="0"/>
+						</mx:Component>
+					</mx:itemRenderer>						
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Client" dataField="client"/>
+			<mx:DataGridColumn headerText="In Reply" dataField="in_reply_to"/>
+		</mx:columns>
+	</mx:DataGrid>
 
-</mx:Canvas>
+</mx:VBox>

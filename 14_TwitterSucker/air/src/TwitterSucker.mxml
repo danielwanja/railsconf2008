@@ -11,13 +11,16 @@
 			progress bar not updated correctly
 			allow concurent spider or 'freeze' ui
 			when failure loading 'older' page, cannot resume.
+			after retry if account tweeted there will be an overlap and loading stops.
 		Account
 			Add (All) make super aggregation
 			A Refresh All functionality
 			Make tweets sort numeric
+	    	Check that File exists before deleting it
 	    Tweets
 	    	Format Date Column (MMM.DD.YY HH:MM:SS)
 	    	Add Filter
+	    	Use Date Sort for Date Filter
 		Stats+Tweets
 			Add Header (with time range)
 			ChartSlider update stats and tweets (filter remains)			
@@ -45,19 +48,23 @@
 		import mx.collections.ArrayCollection;
 		
 		[Bindable]
+		private var tweets:ArrayCollection;
+		
 		private var dataAggregator:TweetDataAggregator;
 				
 		private function filterByDates(fromDate:Number, toDate:Number):void {
 			dataAggregator.aggregateForDateRange(fromDate, toDate);
+			tweets = new ArrayCollection(dataAggregator.getTweets());
 		}
 		
-		private function accountSelected(selectedAccount:Object):void {
-			dataAggregator=selectedAccount as TweetDataAggregator; 
+		private function accountSelected(dataAggregator:TweetDataAggregator):void {
 			if (view.selectedIndex==0) view.selectedIndex=2;
-			showStats();
+			this.dataAggregator = dataAggregator;
+			tweets = new ArrayCollection(dataAggregator.getTweets());
+			showStats(dataAggregator);
 		}
 		
-		private function showStats():void {
+		private function showStats(aggregator:TweetDataAggregator):void {
 			fullChart.setChartData(dataAggregator.tweetsPerDay.source);
 			replyChart.tweetsReplies=dataAggregator.tweetsReplies;
 			hoursAndDayChart.tweetsHourAndDay=dataAggregator.tweetsHourAndDay;
@@ -70,18 +77,19 @@
 			dataAggregator=aggregator;
 			view.selectedIndex = 0; 
 			loader.load(dataAggregator);
-		}				
+		}			
+		
 	]]>
 </mx:Script>
 <mx:HDividedBox width="100%" height="100%">
 	<account:AccountList width="230" height="100%"  
-		accountSelected="accountSelected(event.account);" 
+		accountSelected="accountSelected(event.account as TweetDataAggregator);" 
 		loadAccount="loadAccount(event.account as TweetDataAggregator)"/>
 	<mx:TabNavigator id="view" width="100%" height="100%" creationPolicy="all">
 		<data:TwitterSpider id="loader" width="100%"  height="100%" label="Progress" 
-					loaded="dataAggregator=loader.dataAggregator; view.selectedIndex=2" />
-		<tweetList:TweetList label="Tweets ({dataAggregator.getTweets().length})" 
-							 tweets="{dataAggregator.getTweets()}"
+					loaded="accountSelected(loader.dataAggregator)" />
+		<tweetList:TweetList label="Tweets ({tweets.length})" 
+							 tweets="{tweets}"
 							 width="100%" height="100%" />	    					
 		<mx:VBox width="100%" height="100%" label="Stats" creationPolicy="all">
 			<mx:HBox width="100%" height="33%">
