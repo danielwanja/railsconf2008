@@ -19,7 +19,7 @@
 	
 		// slide 1
 		private function checkEditMode():void {
-			currentState = html.location.lastIndexOf("/edit")||html.location.lastIndexOf("/new") > 0 ? "editMode" : "";
+			currentState = html.location.lastIndexOf("/edit")>0||html.location.lastIndexOf("/new") > 0 ? "editMode" : "";
 		}
 		private function listenToBodyChange():void {
 			html.domWindow.$('entry_body').addEventListener("keyup", entryChanged);
