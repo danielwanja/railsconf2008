@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>HTML SQL Explorer</title>
+
+	<script type="text/javascript" src="AIRAliases.js" />
+	<script type="text/javascript" src="prototype.js" />    
+	<script type="text/javascript" src="sql_controller.js" /> 
+	<script>
+	
+		function init() {
+			this.controller = new SQLExplorerController();
+		}
+	
+	</script>
+</head>
+
+<body onload="init()">
+	<h2 id="statement">SQL Statement</h2>
+	<textarea cols="110" rows="10" id="queryText"></textarea>
+	<input type="Button" value="Execute" onclick="controller.executeSQL()" />
+	<br />
+	<table border="1">
+	  <tr>
+	    <td><div id="list"></div></td>
+	  </tr>
+	</table>    
+</body>
+</html>
