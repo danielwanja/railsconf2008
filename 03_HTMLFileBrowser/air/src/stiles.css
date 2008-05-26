@@ -1,0 +1,19 @@
+.folder {
+  font-size: 9pt;
+  color: blue;
+}
+
+.big-file {
+  font-size: 18pt;
+  color: black;
+}
+
+.normal-file {
+  font-size: 12pt;
+  color: black;
+}
+
+.little-file {
+  font-size: 9pt;
+  color: black;
+}

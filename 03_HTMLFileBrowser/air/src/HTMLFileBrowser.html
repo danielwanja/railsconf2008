@@ -5,31 +5,27 @@
     <title>HTMLFileBrowser</title>
 
   <script type="text/javascript" src="AIRAliases.js"></script>
-  <script type="text/javascript" src="prototype.js"></script>    
+  <script type="text/javascript" src="AIRIntrospector.js"></script>
+  <script type="text/javascript" src="prototype.js"></script>   
+  <script type="text/javascript" src="prototype.js"></script>   
   <script type="text/javascript" src="filebrowser_controller.js"></script>
-  <style>
-     .folder {
-        border: 1px solid red;
-     }
-     .file {
-       border: 1px solid blue;
-     }
-  </style>
+  <link rel="stylesheet" href="stiles.css"></link>
 </head>
 
 <body>
 
-<h1>File Browser</h1>
+<h1>File Cloud Browser</h1>
 <input type="Button" value="Desktop"    onclick="controller.selectRootFolder(air.File.desktopDirectory)" />
 <input type="Button" value="Documents"  onclick="controller.selectRootFolder(air.File.documentsDirectory)" />
 <input type="Button" value="User"       onclick="controller.selectRootFolder(air.File.userDirectory)" />
 <br/>
 <input type="text" id="path" style="width:100%"></input>  
 <br />
-<table>
+<table width="100%">
   <tr>
-    <td><div id="list"></div></td>
-    <td><div id="details"></div><input type="Button" value="Open" onclick="controller.openSelectedFile()"></td>
+    <td width="20%" valign="top"><div id="directoryList" ></div></td>
+    <td valign="top"><div id="fileList"></div></td>
+    <td width="20%" valign="top"><div id="details"></div></td>
   </tr>
 </table>    
 <script>
