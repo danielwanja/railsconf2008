@@ -33,7 +33,7 @@ FileBrowserController.prototype.selectFolder = function(folder, root) {
   var content = new Element('div', { name: "fileRow1" } );
   fileList.insert(content);
   for (var i = 0; i < files.length; i++) {
-	if (!files[i].isDirectory) {
+	if (!files[i].isDirectory && files[i].exists) {
 		var style = this.styleForSize(files[i], totalSize);
 		var fileRef = new Element('a', { rel: files[i].nativePath, 'class': style}).update(files[i].name)
 		content.insert(fileRef);
@@ -80,8 +80,7 @@ FileBrowserController.prototype.directorySize = function(dir) {
 	var files = dir.getDirectoryListing();
     var size = 0 
 	for (var i = 0; i < files.length; i++) {
-		air.Introspector.Console.log("file size " + files[i].size)
-		if (files[i].size > 0) {
+		if (files[i].exists && files[i].size > 0) {
 			size += files[i].size;
 		}
 	}
