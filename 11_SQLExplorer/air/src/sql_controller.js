@@ -12,19 +12,6 @@ SQLExplorerController.prototype.init = function() {
 	this.centerAndShowApp();
 }
 
-SQLExplorerController.prototype.centerAndShowApp = function() {
-	// haxx: only works if on mainScreen
-	var height = window.nativeWindow.height;
-	var width = window.nativeWindow.width;
-	var screenSizeY = air.Screen.mainScreen.visibleBounds.bottom;
-	var screenSizeX = air.Screen.mainScreen.visibleBounds.right;
-	
-	window.nativeWindow.x = screenSizeX/2 - width/2;
-	window.nativeWindow.y = screenSizeY/2 - height/2;
-	
-	window.nativeWindow.visible = true;
-}
-
 SQLExplorerController.prototype.executeSQL = function() {
 	this.createStatement($('queryText').value);
 	this.statement.execute();
@@ -32,10 +19,31 @@ SQLExplorerController.prototype.executeSQL = function() {
 
 SQLExplorerController.prototype.formatSQLResults = function() {
 	result = this.statement.getResult();
-	alert(result.rowsAffected + " rows affected");
-	alert(result.data != null);
-	if (result.data != null) {
-		alert(result.data[0]['firstName']);
+	if (result.data != null && result.data.length > 0) {
+		t = $('resultsTable');
+		t.innerHTML = '';
+		// alias
+		data = result.data
+		// get all column names from first object in first row
+		headerRow = new Element('tr')
+		t.insert(headerRow)
+		columns = [];
+		for (column in data[0]) {
+			air.Introspector.Console.log("found column: " + column)
+			columns.push(column);
+			th = new Element('th').update(column);
+			headerRow.insert(th);
+		}
+		for (var i=0; i < data.length; i++) {
+			tr = new Element('tr')
+			t.insert(tr)
+			air.Introspector.Console.log("found data: ")
+			air.Introspector.Console.dump(columns)
+			for (var c=0; c<columns.length; c++) {
+				td = new Element('td').update(data[i][columns[c]])
+				tr.insert(td)
+			}
+		}
 	}
 }
 
@@ -65,6 +73,19 @@ SQLExplorerController.prototype.initializeDatabase = function() {
 	this.createStatement(sql);
 	this.statement.execute();
     
+}
+
+SQLExplorerController.prototype.centerAndShowApp = function() {
+	// haxx: only works if on mainScreen
+	var height = window.nativeWindow.height;
+	var width = window.nativeWindow.width;
+	var screenSizeY = air.Screen.mainScreen.visibleBounds.bottom;
+	var screenSizeX = air.Screen.mainScreen.visibleBounds.right;
+	
+	window.nativeWindow.x = screenSizeX/2 - width/2;
+	window.nativeWindow.y = screenSizeY/2 - height/2;
+	
+	window.nativeWindow.visible = true;
 }
 
 SQLResultHandler = function() { }

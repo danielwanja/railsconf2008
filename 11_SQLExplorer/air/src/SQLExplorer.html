@@ -4,6 +4,7 @@
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<title>HTML SQL Explorer</title>
 
+	<script type="text/javascript" src="AIRIntrospector.js" /> <!-- debugging only -->
 	<script type="text/javascript" src="AIRAliases.js" />
 	<script type="text/javascript" src="prototype.js" />    
 	<script type="text/javascript" src="sql_controller.js" /> 
@@ -21,10 +22,10 @@
 	<textarea cols="110" rows="10" id="queryText"></textarea>
 	<input type="Button" value="Execute" onclick="controller.executeSQL()" />
 	<br />
-	<table border="1">
-	  <tr>
-	    <td><div id="list"></div></td>
-	  </tr>
-	</table>    
+	<div id="resultsContainer">
+		<h2 id="header">SQL Results</h2>
+		<table id="resultsTable" width="100%">
+		</table>
+	</div>
 </body>
 </html>
