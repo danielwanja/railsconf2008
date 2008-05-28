@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	rake db:structure:dump
+	// generates rails/db/development.sqlite3  
+	
+	
+	// Issues
+	// auto increment ids (not on the AIR side?)
+-->
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute">
+<mx:Script>
+	<![CDATA[
+		import mx.controls.Alert;
+	
+		import flash.data.*;
+	
+		private var dbcreate:Array = 
+			['CREATE TABLE schema_info (version integer)',
+			 'CREATE TABLE tasks ("id" INTEGER PRIMARY  NOT NULL, "title" varchar(255) DEFAULT NULL, "description" text DEFAULT NULL, "due" datetime DEFAULT NULL, "completed" boolean DEFAULT NULL, "created_at" datetime DEFAULT NULL, "updated_at" datetime DEFAULT NULL)', 
+			 'INSERT INTO schema_info (version) VALUES (1)'
+			]
+	
+		private var db:SQLConnection = null; 
+		private var stmt:SQLStatement = null;
+		
+		private const NONE:Number = -1;
+		private const  CREATE_SCHEMA:Number = 0; 
+		private const  INSERT_DATA:Number = 1; 
+		private var state:Number = NONE; 
+		
+		private function doLoad():void { 
+		    var file:File = File.documentsDirectory.resolvePath('tasks.db' );  //File.applicationDirectory.resolvePath('tasks.db' ); 
+		    db = new SQLConnection(); 
+		    db.addEventListener( SQLEvent.OPEN, doDbOpen ); 
+		    db.open( file, SQLMode.CREATE ); 
+		} 
+		private function doDbOpen( event:SQLEvent ):void  
+		{ 
+			for each (var statement:String in dbcreate) {
+				execute(statement); // Not sure hey arrive in order...execution should wait on the next or see how to have multipel
+			}
+		} 
+		private function execute(statement:String):void {
+			trace("SQL:"+statement);
+		    stmt = new SQLStatement(); 
+		    stmt.addEventListener( SQLErrorEvent.ERROR, doStmtError ); 
+		    stmt.addEventListener( SQLEvent.RESULT, doStmtResult ); 
+		    stmt.sqlConnection = db; 
+		    stmt.text = statement;		   
+		    stmt.execute(); 			
+		}
+		private function doSave():void { 
+		    var first = "Daniel"
+		    var last = "Wanja"
+		stmt.text = 'INSERT INTO contact VALUES ( ' + 
+		                        'NULL, ' + 
+		                        '\'' + first + '\', ' + 
+		                        '\'' + last + '\' )'; 
+		    state = INSERT_DATA; 
+		    stmt.execute(); 
+		} 
+		private function doStmtResult( event:SQLEvent ):void  
+		{ 
+		    switch( state ) 
+		    { 
+		         case CREATE_SCHEMA: 
+		              alert( 'The database table has been created.' ); 
+		              state = NONE; 
+		              break; 
+		         case INSERT_DATA: 
+		              document.getElementById( 'txtFirst' ).value = ''; 
+		              document.getElementById( 'txtLast' ).value = ''; 
+		              alert( 'A new record has been stored.' ); 
+		    } 
+		} 
+		private function doStmtError( event:SQLErrorEvent ):void 
+		{ 
+		    alert( 'There has been a problem executing a statement:\n' + event.error.message ); 
+		} 
+
+		private function alert(msg:String):void {
+			mx.controls.Alert.show(msg, "Noooo!");
+		}
+	]]>
+</mx:Script>
+	<mx:Button label="create" click="doLoad()" />
+</mx:WindowedApplication>
