@@ -5,21 +5,14 @@
 	click="app().itemClick(event);"
 	filters="{calcFilters(app().roamer.currentItem, data as Item)}"
 >	
-	<!--
-	////////////////////////////////////////////////////////////////////////////////
-	//
-	//  Copyright (C) 2006 Adobe Macromedia Software LLC and its licensors.
-	//  All Rights Reserved. The following is Source Code and is subject to all
-	//  restrictions on such code as contained in the End User License Agreement
-	//  accompanying this product.
-	//
-	////////////////////////////////////////////////////////////////////////////////
-	-->
+	<mx:states>
+		<mx:State name="cached"/>
+	</mx:states>
 	
-	<!-- XMLItemView.mxml is the item renderer component for one XML item. We simply display the 'prop' 
-	     attribute of the XML item in a colored box. -->
+	<!-- XMLItemView.mxml is the item renderer component for one XML item. 
+		 We simply display the 'name' attribute of the XML item in a colored box. -->
 				
-	<mx:Text fontSize="13" text="{data.data.name}" color="#ffffff" width="65" selectable="false"/>	
+	<mx:Text fontSize="13" text="{data.data.name}" color="#ffffff" width="65" selectable="false"/>
 	<mx:Image source="{data.data.profile_image_url}"/>
 
 	<mx:Script>
@@ -31,7 +24,6 @@
 			import mx.core.Application;
 			
 			public function doubleClick(event: Event): void {
-				trace("doubleclicked");
 				app().itemDoubleClick(event);
 			}
 			

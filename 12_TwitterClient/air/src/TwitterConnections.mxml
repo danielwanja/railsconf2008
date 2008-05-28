@@ -6,7 +6,6 @@
             - style tweets (remove xml)
             - don't retrieve if already in graph
             - better error handling
-            - toggle ControlPanel visibility
             - better defaults
 -->
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" 
@@ -33,7 +32,7 @@
             [Bindable]
             private var selectedItem:Item;  // simple click selects user, double click retrieve friends
             
-        private var graph:MyGraph = new MyGraph();
+        private var graph:Graph;
         
         // Rails server calls
         // --------------------------------------
@@ -45,8 +44,10 @@
             setupGraph();
         }
             
-        private function searchTwitterUser(user:String):void {
-            
+        private function searchTwitterUser(twitterUser:String):void {
+            currentUser = twitterUser;
+            user.send();
+            setupGraph();
         }    
         /*
         <user>
@@ -61,37 +62,27 @@
     */
             
         private function showUser(event:ResultEvent):void {
-            trace(event.result);
             var user:XML = event.result as XML;
             var item:Item = new Item(user.name);
             item.data = user;
             graph.add(item);
-            //roamer.currentItem = item;
-            roamer.dataProvider = graph;
+            roamer.dataProvider = graph; //FORCE refresh
         }    
         
         private function showFriends(event:ResultEvent):void {
             var result:XML = event.result as XML;
             var users:XMLList = result.record;
             var currentUser:Item = event.token.currentUser;
-            trace("Found friends for "+currentUser.data.name);
-            graph.disableNotification();
-            try {
-                for each (var user:XML in users) {
-                    var friend:Item = new Item(user.name);
-                    friend.data = user;
-                    graph.add(friend);
-                    graph.link(currentUser, friend);
-                }
-            } finally {
-                graph.enableNotification();
+            for each (var user:XML in users) {
+                var friend:Item = new Item(user.name);
+                friend.data = user;
+                graph.add(friend);
+                graph.link(currentUser, friend);
             }
-            //roamer.currentItem = currentUser;
-            //roamer.dataProvider = graph;    
             roamer.currentItem = currentUser;    
         }
         
-        // Graph Handlig
+        // Graph Handling
         // --------------------------------------
 
             /*
@@ -103,6 +94,7 @@
                 roamer.resetHistory();
                 roamer.resetShowHide();
                 roamer.xmlNames = ['user','Edge','fromID','toID']; //['Node','Edge','fromID','toID']
+                graph = new Graph()
                 roamer.dataProvider = graph;         
             }
             
@@ -116,7 +108,6 @@
             
             public function itemClick(event: Event) : void {
                 selectedItem = event.currentTarget.data;
-                trace("Selected:"+selectedItem);
             }    
         
              

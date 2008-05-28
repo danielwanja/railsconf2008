@@ -1,58 +1,63 @@
-=begin
-  Simplify code. Maybe just need to get data and send it.
-  Don't cache for first version.
-  Don't use "own" TwitterInstance, use explicit api Twitter::User.find(user, twitter)
-  Find easy way to convert returned Twitter::User.find(user, twitter) to xml
-=end
 class TwitterController < ApplicationController
 
+  @@twitter = Twitter::Client.from_config(
+                File.join(File.dirname(__FILE__), '..', '..', 'config', 'twitter.yml'))
+
   def user
-    render :xml => get_user(params[:id])[:xml]
+    render :xml => account.user 
   end
   
   def friends    
-    render :xml => get_friends(params[:id])[:xml]
+    acc = account
+    unless acc.friends
+      u = Twitter::User.find(params[:id], @@twitter)
+      acc.update_attribute(
+                  'friends', 
+                  u.friends.collect {|f| to_hash(f) }.to_xml(:dasherize => false))
+    end
+    render :xml => acc.friends
   end
   
+  
+=begin
+  Non cached version
+  def user
+    u =  Twitter::User.find(params[:id], @@twitter)
+    render :xml => to_hash(u).to_xml(:root => :user, :dasherize => false)
+  end
+
+  def friends    
+    u = Twitter::User.find(params[:id], @@twitter)
+    f = u.friends
+    a = f.collect {|f| to_hash(f) }
+    render :xml => a.to_xml(:dasherize => false)
+  end
+=end  
+    
   protected
   
-  # user Hash with :user, :xml, :friends
-  def get_user(username)
-    unless u = @@cache[username]
-      new_u = {:user => TwitterInstance.find(username)}
-      new_u[:xml] = to_hash(new_u[:user]).to_xml(:root => :user, :dasherize => false)
-      new_u[:friends] = nil
-      u = @@cache[username] = new_u      
-    end
-    u
+  def account
+    acc = Account.find_or_initialize_by_name(params[:id])
+    if acc.new_record? #Not in db, let's retrieve and store
+      u =  Twitter::User.find(params[:id], @@twitter)
+      acc.user = to_hash(u).to_xml(:root => :user, :dasherize => false)
+      acc.save
+    end  
+    acc  
   end
   
-  # friends Hash with :array, :xml 
-  def get_friends(username)
-    u = get_user(username)
-    unless u[:friends]
-      new_f = {:array => TwitterInstance.friends(username).collect {|f| to_hash(f) }}
-      new_f[:xml] = new_f[:array].to_xml(:dasherize => false)
-      u[:friends] = new_f
-    end
-    u[:friends]
+  def to_xml(user)
+    to_hash(user)
   end  
   
-  # Poor man's user cache
-  #    name
-  #    keep user instance returned from twitter
-  #    friends - nil never retrieved - array retrieved
-  @@cache = {}
-  
-  
-  def to_hash(friend)
-    {:id  =>  friend.id,
-     :profile_image_url  =>  friend.profile_image_url,
-     :description  =>  friend.description,
-     :url  =>  friend.url,
-     :name  =>  friend.name,
-     :location  =>  friend.location,
-     :screen_name  =>  friend.screen_name}
+  def to_hash(user)
+    {:id  =>  user.id,
+     :profile_image_url  =>  user.profile_image_url,
+     :description  =>  user.description,
+     :url  =>  user.url,
+     :name  =>  user.name,
+     :location  =>  user.location,
+     :screen_name  =>  user.screen_name}
   end
   
 end
