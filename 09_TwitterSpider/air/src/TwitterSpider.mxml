@@ -86,7 +86,7 @@
 		accountSelected="accountSelected(event.account as TweetDataAggregator);" 
 		loadAccount="loadAccount(event.account as TweetDataAggregator)"/>
 	<mx:TabNavigator id="view" width="100%" height="100%" creationPolicy="all">
-		<data:TwitterSpider id="loader" width="100%"  height="100%" label="Progress" 
+		<data:HTMLSpider id="loader" width="100%"  height="100%" label="Progress" 
 					loaded="accountSelected(loader.dataAggregator)" />
 		<tweetList:TweetList label="Tweets ({tweets.length})" 
 							 tweets="{tweets}"
