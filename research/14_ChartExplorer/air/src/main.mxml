@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical">
+<mx:Script>
+	<![CDATA[
+		import mx.effects.easing.Bounce;
+	
+		import mx.formatters.DateFormatter;
+		import mx.charts.series.LineSeries;
+		import mx.collections.ArrayCollection;
+		import mx.rpc.AsyncToken;
+		import mx.rpc.events.ResultEvent;
+		
+		private function getChartData(ticker:String):void {
+								 // http://ichart.finance.yahoo.com/table.csv?s=AAPL&d=3&e=18&f=2008&g=d&a=8&b=7&c=1984&ignore=.csv
+			var call:AsyncToken = chartDataRequest.send({s:ticker, a:1, b:1, c:2007});
+			call.ticker = ticker;
+			trace("@@calling:"+ticker);
+		}	
+		private function loadData(event:ResultEvent):void {
+			var data:Array = cvsToProvider(event.result as String);
+			//var symbolData:Object = {label:event.token.ticker, data:data};
+			trace("@@loaded "+event.token.ticker);
+			var series:Array = chart.series
+			var serie:LineSeries = new LineSeries();
+			serie.yField = 'close';
+			serie.xField = 'date';
+			serie.displayName = event.token.ticker;
+			serie.dataProvider = new ArrayCollection(data);
+			series.push(serie)
+			if (chart.dataProvider==null) chart.dataProvider = serie.dataProvider;			
+			chart.series = series;			
+		}
+		/**
+		 * From Date,Open,High,Low,Close,Volume,Adj Close
+		 *		2008-04-17,154.17,156.00,153.35,154.49,25152400,154.49
+		 * To
+		 *
+		 */
+		private function cvsToProvider(csv:String):Array {
+			var data:Array = [];
+			if (csv==null) return null;
+			var entries:Array = csv.split("\n");
+			if (entries.length>1) {
+				for (var i:Number=1; i<entries.length;i++) {
+					var parts:Array = entries[i].split(',');
+					data.push({date: dateFromString(parts[0]),
+							   open: Number(parts[1]),
+							   close: Number(parts[2]),
+							   high:  Number(parts[3]),
+							   low: Number(parts[4])});
+				}
+			}			
+			return data;
+		}
+		private function dateFromString(s:String):Date {
+			  var a:Array = s.split("-");
+              var d:Date =  new Date(a[0],a[1]-1,a[2]);
+              return d;			
+		}
+		
+		//[Bindable]
+		//private var serie:ArrayCollection;
+		
+	]]>
+</mx:Script>
+<mx:DateFormatter id="dateFormatter" formatString="YYYY-MM-DD" />
+<mx:TextInput id="searchSymbol" /><mx:Button label="Go" click="getChartData(searchSymbol.text)" />
+<mx:HTTPService id="chartDataRequest" url="http://ichart.finance.yahoo.com/table.csv" result="loadData(event)"  fault="mx.controls.Alert.show('Symbol Not Found:'+event.token.ticker)" />	
+<mx:LineChart id="chart" width="100%" height="100%"  showDataTips="true">
+	<mx:horizontalAxis>
+		<mx:DateTimeAxis   />
+	</mx:horizontalAxis>
+	<mx:verticalAxis>
+		<mx:LinearAxis baseAtZero="false" />
+	</mx:verticalAxis>
+	<!--
+	<mx:series>
+		<mx:LineSeries yField="close" dataProvider="{serie}"  />		
+	</mx:series>
+	-->
+</mx:LineChart>	
+ <mx:SeriesInterpolate id="seriesEffect" duration="2000" easingFunction="{Bounce.easeOut}"/>
+    
+
+	<mx:Legend id="legend" dataProvider="{chart}"   direction="horizontal" width="100%"/>	
+</mx:WindowedApplication>
