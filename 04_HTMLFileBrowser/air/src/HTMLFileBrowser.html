@@ -4,19 +4,26 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>HTMLFileBrowser</title>
 
-  <script type="text/javascript" src="AIRAliases.js"></script>
-  <script type="text/javascript" src="AIRIntrospector.js"></script>
-  <script type="text/javascript" src="prototype.js"></script>   
-  <script type="text/javascript" src="prototype.js"></script>   
-  <script type="text/javascript" src="filebrowser_controller.js"></script>
-  <link rel="stylesheet" href="stiles.css"></link>
+	<!-- AIRIntrospector is for debugging only - remove before packaging and deploying -->
+	<script type="text/javascript" src="AIRIntrospector.js" /> 
+	<!-- AIRAliases give API classes and methods an easy to remember prefix: 'air', for instance air.SQLResult -->
+	<script type="text/javascript" src="AIRAliases.js" />
+	<!-- the prototype library has utility methods for working with HTML. It also ships with Rails -->
+	<script type="text/javascript" src="prototype.js" />    
+	<!-- the logic for the application -->
+  	<script type="text/javascript" src="filebrowser_controller.js"></script>
+
+  	<link rel="stylesheet" href="stiles.css"></link>
 </head>
 
 <body>
 
 <h1>File Cloud Browser</h1>
+<!-- Sets the current folder to the user's desktop -->
 <input type="Button" value="Desktop"    onclick="controller.selectRootFolder(air.File.desktopDirectory)" />
+<!-- Sets the current folder to the user's document directory -->
 <input type="Button" value="Documents"  onclick="controller.selectRootFolder(air.File.documentsDirectory)" />
+<!-- Sets the current folder to the user's home directory -->
 <input type="Button" value="User"       onclick="controller.selectRootFolder(air.File.userDirectory)" />
 <br/>
 <input type="text" id="path" style="width:100%"></input>  

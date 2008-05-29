@@ -4,12 +4,17 @@
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<title>HTML SQL Explorer</title>
 
-	<script type="text/javascript" src="AIRIntrospector.js" /> <!-- debugging only -->
+	<!-- AIRIntrospector is for debugging only - remove before packaging and deploying -->
+	<script type="text/javascript" src="AIRIntrospector.js" /> 
+	<!-- AIRAliases give API classes and methods an easy to remember prefix: 'air', for instance air.SQLResult -->
 	<script type="text/javascript" src="AIRAliases.js" />
+	<!-- the prototype library has utility methods for working with HTML. It also ships with Rails -->
 	<script type="text/javascript" src="prototype.js" />    
+	<!-- sql_controller contains the logic for this application -->
 	<script type="text/javascript" src="sql_controller.js" /> 
 	<script>
-	
+		
+		// called on load
 		function init() {
 			this.controller = new SQLExplorerController();
 			$('resultsContainer').hide();

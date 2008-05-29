@@ -5,12 +5,12 @@
 
 .big-file {
   font-size: 18pt;
-  color: black;
+  color: red;
 }
 
 .normal-file {
   font-size: 12pt;
-  color: black;
+  color: green;
 }
 
 .little-file {
