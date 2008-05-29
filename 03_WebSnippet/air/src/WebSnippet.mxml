@@ -15,7 +15,9 @@ Todo:  	- remove highlight while loading
 	<mx:states>
 		<mx:State name="loading">
 			<mx:AddChild position="lastChild">
-				<mx:VBox verticalAlign="middle" horizontalAlign="center" width="100%" height="100%" backgroundAlpha="0.14" backgroundColor="white">
+				<mx:VBox verticalAlign="middle" horizontalAlign="center" 
+						width="100%" height="100%" 
+						backgroundAlpha="0.14" backgroundColor="white">
 					<mx:HTML location="app:/wait.html" />					
 				</mx:VBox>
 			</mx:AddChild>
@@ -25,6 +27,7 @@ Todo:  	- remove highlight while loading
 	<![CDATA[
 		import mx.controls.Image;
 		import mx.core.Window;
+		import flash.display.Sprite;
 		import flash.ui.ContextMenu;
 		import flash.ui.ContextMenuItem;
 		
@@ -46,7 +49,7 @@ Todo:  	- remove highlight while loading
 				
 		private var highlighter:Sprite;
 		private function setupHighlighter():void {
-			    highlighter = new Sprite();
+			highlighter = new Sprite();
 	        highlighter.mouseEnabled =  false; // click goes behind
 	        highlighter.buttonMode = true;
 	        highlighter.contextMenu = appMenu;	   
@@ -81,7 +84,7 @@ Todo:  	- remove highlight while loading
 		}
 		
 		private function highlight(x:Number, y:Number, w:Number, h:Number):void {
-			highlighter.graphics.clear();	        
+			highlighter.graphics.clear();
 		    highlighter.graphics.beginFill(0xFFCC00, 0.2);
 		    highlighter.graphics.lineStyle(3, 0xFFCC00, 0.9, false);
 		    highlighter.graphics.drawRect(x, y, w, h); // FIXME: clip to container
