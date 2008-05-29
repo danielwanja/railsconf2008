@@ -19,33 +19,60 @@ SQLExplorerController.prototype.executeSQL = function() {
 
 SQLExplorerController.prototype.formatSQLResults = function() {
 	result = this.statement.getResult();
+	air.Introspector.Console.dump(result)
 	if (result.data != null && result.data.length > 0) {
 		t = $('resultsTable');
 		t.innerHTML = '';
 		// alias
 		data = result.data
-		// get all column names from first object in first row
 		headerRow = new Element('tr')
 		t.insert(headerRow)
 		columns = [];
+		// get all column names from first object in first row
 		for (column in data[0]) {
 			air.Introspector.Console.log("found column: " + column)
 			columns.push(column);
 			th = new Element('th').update(column);
 			headerRow.insert(th);
 		}
+		// create rows for each row of data
 		for (var i=0; i < data.length; i++) {
 			tr = new Element('tr')
 			t.insert(tr)
 			air.Introspector.Console.log("found data: ")
-			air.Introspector.Console.dump(columns)
 			for (var c=0; c<columns.length; c++) {
 				td = new Element('td').update(data[i][columns[c]])
 				tr.insert(td)
 			}
 		}
+	} else if (result != null && result.complete) { //good result, but no data selected
+		t = $('resultsTable');
+		t.innerHTML = '';
+		tr = new Element('tr')
+		t.insert(tr)
+		td = new Element('td')
+		tr.insert(td)
+		td.update('Successful')
+		if (result.rowsAffected) {
+			td = new Element('td')
+			tr.insert(td)
+			td.update(result.rowsAffected + ' rows affected')
+		}
+		if (result.lastInsertRowID) {
+			td = new Element('td')
+			tr.insert(td)
+			td.update('Last inserted id: ' + result.lastInsertRowID)
+		}
 	}
+	$('resultsContainer').show();
 }
+
+// {
+//   complete=true
+//   data=null
+// [null]  lastInsertRowID=2
+//   rowsAffected=1
+// }
 
 SQLExplorerController.prototype.createStatement = function(sql) {
 	this.statement = new air.SQLStatement();

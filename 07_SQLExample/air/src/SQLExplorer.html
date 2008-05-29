@@ -12,6 +12,7 @@
 	
 		function init() {
 			this.controller = new SQLExplorerController();
+			$('resultsContainer').hide();
 		}
 	
 	</script>
@@ -24,7 +25,7 @@
 	<br />
 	<div id="resultsContainer">
 		<h2 id="header">SQL Results</h2>
-		<table id="resultsTable" width="100%">
+		<table id="resultsTable" width="100%" border="1" cellspacing="0" cellpadding="4">
 		</table>
 	</div>
 </body>
