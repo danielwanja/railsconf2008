@@ -15,7 +15,7 @@ package data
 
 		static public function accountNames():Array {
 			var file:File = File.documentsDirectory;
-			file = file.resolvePath("TwitterSucker");
+			file = file.resolvePath("TwitterSpider");
 			if (!file.exists) return [];
 			var files:Array = file.getDirectoryListing();
 			var results:Array = [];
@@ -28,7 +28,7 @@ package data
 		}
 		static public function load(aggregator:TweetDataAggregator):void {
 			var file:File = File.documentsDirectory;			
-			file = file.resolvePath("TwitterSucker/"+aggregator.accountName+".dat");
+			file = file.resolvePath("TwitterSpider/"+aggregator.accountName+".dat");
 			var fileStream:FileStream = new FileStream();
 			fileStream.open(file, FileMode.READ);
 			try {
@@ -43,7 +43,7 @@ package data
 		static public function save(aggregator:TweetDataAggregator):void {
 			var tweets:Array = aggregator.getTweets();
 			var file:File = File.documentsDirectory;
-			file = file.resolvePath("TwitterSucker/"+aggregator.accountName+".dat");
+			file = file.resolvePath("TwitterSpider/"+aggregator.accountName+".dat");
 			var fileStream:FileStream = new FileStream();
 			fileStream.open(file, FileMode.WRITE);
 			try {
