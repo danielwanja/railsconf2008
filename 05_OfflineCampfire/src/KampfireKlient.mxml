@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 
 	Demonstrates System Integration
-	 NativeApplication.nativeApplication.icon.menu
+	Dock/Systray icon manipulation
+	Native Menues
+	Custom Chrome Windows
+	Network Events
 	 
 -->
 <mx:WindowedApplication
@@ -32,6 +35,10 @@
 		
 		private var preferencesView:SettingsView;
 		
+		/**
+		 * Called after application initialization
+		 * 
+		 */
 		private function setup():void {
 			readPreferences();
 			configureMenus();
@@ -40,6 +47,10 @@
 			accountField.setFocus();
 		}
 		
+		/**
+		 * Replace system menus with an 'Edit' Menu
+		 * that triggers the settings view 
+		 */
 		private function configureMenus():void {
 			var rootMenu:NativeMenu = new NativeMenu();
 			var editMenu:NativeMenu = new NativeMenu();
@@ -60,16 +71,29 @@
 
 		}
 		
+		/**
+		 * Listen for two events:
+		 * <li />When a network change event occurs, call checkNetwork
+		 * <li />When window recieves focus, call windowActivate on the unreadMessageManager
+		 */ 
 		private function configureListeners():void {
 			NativeApplication.nativeApplication.addEventListener(Event.NETWORK_CHANGE, checkNetwork);
 			NativeApplication.nativeApplication.addEventListener(Event.ACTIVATE, unreadMessageManager.windowActivate);
 		}
 		
-		private function addInterval():void {
+		/**
+		 * Starts periodically checking for new messages
+		 */
+		private function checkForNewMessages():void {
+			// setInterval periodically calls a given method
 			if (intervalId==-1)
 				intervalId = setInterval(checkMessages, 5*1000);			
 		}
-		private function removeInterval():void {
+		
+		/**
+		 * Stops periodically checking for new messages
+		 */
+		private function stopCheckingMessages():void {
 			if (intervalId!=-1) {
 			   clearInterval(intervalId)
 			   intervalId = -1;
@@ -81,6 +105,10 @@
 			currentState='accountSelected';
 		}
 		
+		/**
+		 * Checks all messages in the table of messages in the HTML control
+		 * If we haven't seen the message ids listed there before, we have new messages
+		 */
 		//FIXME: see if we can set an html event to trap when the body of a table changes.	
 		private function checkMessages():void {
 			if (currentState!='accountSelected') return;
@@ -106,18 +134,28 @@
 			}		
 		}
 		
+		/**
+		 * New message recieved
+		 */
 		private function dispatchNewMessageDetected(person:String, message:String):void {
+			// if we're not the active window
 			if (!NativeApplication.nativeApplication.activeWindow) {
+				// bounce the dock icon if there is one
 				if (NativeApplication.supportsDockIcon){		
 					var dockicon:DockIcon = NativeApplication.nativeApplication.icon as DockIcon;
 					dockicon.bounce("informational"); //Note, only bounces if application is not active.
 				}
+				
+				// tell the unread message manager we have new messages
 				unreadMessageManager.newUnreadMessage();
 				restoreIfMinimized();
 				growl(person, message);
 			}
 		}
 		
+		/**
+		 * If settings allow, shows a growl type notification of a new message
+		 */
 		private function growl(person:String, message:String):void {
 			if (growlOnMessage) {
 				var growlWindow:MessageNotification = new MessageNotification();
@@ -125,13 +163,54 @@
 			}
 		}
 		
+		/**
+		 * If settings allow, restore window from minimized state
+		 */
 		private function restoreIfMinimized():void {
 			if (nativeWindow.displayState == NativeWindowDisplayState.MINIMIZED && restoreOnMessage) {
 				restore();
 			}
 		}
 		
-		// SLIDE2:
+//========================================================================
+//  Preferences
+//========================================================================
+		
+		private function settingsMenuSelected(e:Event):void {
+			showPreferencesEdtor();
+		}
+		
+		private function showPreferencesEdtor():void {
+			if (!showingPreferences) {
+				if (preferencesView == null) {
+					preferencesView = PopUpManager.createPopUp(this, SettingsView, true) as SettingsView;
+					preferencesView.addEventListener('close', hidePreferencesEditor);
+					PopUpManager.centerPopUp(preferencesView);
+				} else {
+					PopUpManager.addPopUp(preferencesView, this, true);
+				}
+				showingPreferences = true;
+			}
+		}
+		
+		private function hidePreferencesEditor(e:Event=null):void {
+			PopUpManager.removePopUp(preferencesView);
+			readPreferences();
+			showingPreferences = false;
+		}
+		
+		private function readPreferences():void {
+			var so:SharedObject = SharedObject.getLocal('air-campfire-prefs');
+			if (so.data['restoreOnMessage'] != null || so.data['growlOnMessage'] != null) {
+				restoreOnMessage = so.data['restoreOnMessage'] as Boolean;
+				growlOnMessage = so.data['growlOnMessage'] as Boolean;
+			}
+		}
+		
+//========================================================================
+//  Network
+//========================================================================
+
 		
 		[Bindable]
 		private var connected:Boolean=true;
@@ -166,40 +245,6 @@
 		    trace(entry);
 		}
 		
-		
-		// Preferences
-		
-		private function settingsMenuSelected(e:Event):void {
-			showPreferencesEdtor();
-		}
-		
-		private function showPreferencesEdtor():void {
-			if (!showingPreferences) {
-				if (preferencesView == null) {
-					preferencesView = PopUpManager.createPopUp(this, SettingsView, true) as SettingsView;
-					preferencesView.addEventListener('close', hidePreferencesEditor);
-					PopUpManager.centerPopUp(preferencesView);
-				} else {
-					PopUpManager.addPopUp(preferencesView, this, true);
-				}
-				showingPreferences = true;
-			}
-		}
-		
-		private function hidePreferencesEditor(e:Event=null):void {
-			PopUpManager.removePopUp(preferencesView);
-			readPreferences();
-			showingPreferences = false;
-		}
-		
-		private function readPreferences():void {
-			var so:SharedObject = SharedObject.getLocal('air-campfire-prefs');
-			if (so.data['restoreOnMessage'] != null || so.data['growlOnMessage'] != null) {
-				restoreOnMessage = so.data['restoreOnMessage'] as Boolean;
-				growlOnMessage = so.data['growlOnMessage'] as Boolean;
-			}
-		}
-		
 	]]>
 </mx:Script>
 
@@ -230,9 +275,9 @@
 	<!-- FIXME: create a html page that can be access/distributed from the application -->
 	<mx:HTML top="{accountSelectionBox.height}" width="100%" height="100%" id="html"
 		location="app:/pleaseWait.html" 
-		locationChange="trace('locationChange');removeInterval();" 
+		locationChange="trace('locationChange');stopCheckingMessages();" 
 		htmlDOMInitialize="trace('htmlDOMInitialize'); " 
-		complete="trace('complete'); addInterval();" 
+		complete="trace('complete'); checkForNewMessages();" 
 		initialize="trace('initialize')" />
 		
 </mx:WindowedApplication>
