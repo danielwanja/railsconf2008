@@ -27,7 +27,7 @@
             import com.adobe.flex.extras.controls.springgraph.Graph;
             
             [Bindable]
-            private var currentUser:String = 'railsconf2008';
+            private var currentUser:String;
             
             [Bindable]
             private var selectedItem:Item;  // simple click selects user, double click retrieve friends
@@ -38,10 +38,9 @@
         // --------------------------------------
         
         private function init():void {
-            user.send();
             roamer.repulsionFactor = 0.4;
             roamer.showHistory = true;
-            setupGraph();
+            searchTwitterUser('railsconf2008')
         }
             
         private function searchTwitterUser(twitterUser:String):void {
@@ -49,6 +48,20 @@
             user.send();
             setupGraph();
         }    
+        
+        /*
+        <Node id="1" prop="1(4)"/>
+        <Edge fromID="1.2.3.4" toID="1.2.3.4.5"/>
+        
+        */
+        private function setupGraph(): void {
+            roamer.resetHistory();
+            roamer.resetShowHide();
+            roamer.xmlNames = ['user','Edge','fromID','toID']; //['Node','Edge','fromID','toID']
+            graph = new Graph()
+            roamer.dataProvider = graph;         
+        }
+        
         /*
         <user>
   <description>Flex and Ruby on Rails developer</description>
@@ -84,19 +97,6 @@
         
         // Graph Handling
         // --------------------------------------
-
-            /*
-            <Node id="1" prop="1(4)"/>
-            <Edge fromID="1.2.3.4" toID="1.2.3.4.5"/>
-            
-            */
-            private function setupGraph(): void {
-                roamer.resetHistory();
-                roamer.resetShowHide();
-                roamer.xmlNames = ['user','Edge','fromID','toID']; //['Node','Edge','fromID','toID']
-                graph = new Graph()
-                roamer.dataProvider = graph;         
-            }
             
             public function itemDoubleClick(event: Event): void {
                 roamer.currentItem = event.currentTarget.data;
