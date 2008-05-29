@@ -1,69 +1,73 @@
 Projects to demonstrate Powering AIR with Rails.
 
-@NOTE: this are only place holeder with initial testing. 
-We can regorganized to a more logical approach as required.
+01_AIRBrowser 
+  mx:HTML
+  dougmccune CoverFlowContainer
 
-00_AIRBrowser [Flex]
-    mx:HTML
-    dougmccune CoverFlowContainer
-    
-01_HelloBlog [Flex+Rails]
-    ActionScript/Javascript Brige
-    Drag Drop API
-    
-02_VotingApp [delete that one]
+02_HelloBlog
+  ActionScript/Javascript Brige
+  Drag Drop API
 
-03_HTMLFileBrowser [HTML]
+03_WebSnippet
+  javascript injection using HTMLComponent
+  File
+  Sprite/drawing API
+  Window API
+  Bitmap manipulation
+  
+04_HTMLFileBrowser
   File System Access
   AIRAliases.js
 
-04_PhotoBooth [Flex+Rails]
+05_OfflineCampfire
+  Windowing API
+  flash.desktop.NativeApplication
+  DockIcon
+  SharedObject
+
+06_S3Browser
+  flash.filesystem.File.upload
+  HTTPService + REST (list, create, delete)  
+  attachment_fu (S3)
+  
+07_SQLExample
+  sql lite from AIR
+  
+08_PhotoBooth
   flash.media.Camera
   flash.media.Video
   flash.net.URLLoader
   attachment_fu (file)
 
-05_VisualBlog [delete that one]
+09_TwitterSpider
+  Charting API
+  DataGrid/Filtering
   
-06_WebSnipet [Flex]
-    javascript injection using HTMLComponent
-    File
-    Sprite/drawing API
-    Window API
+10_TwitterFriends
+  com.adobe.flex.extras.controls.springgraph
+  twitter4r
 
-07_VideoMessenger [delete that one]
-  uses SimpleFlvWriter.as (not efficient)
+Enjoy,
+
+Daniel and Tony!
+
+
+/research - (projects that didn't make it for the presentation)
+
+07_VideoMessenger
+  uses SimpleFlvWriter.as (not efficient, no sound)
   
-07_VideoMessengerWithSteaming [Flex+Haxe]
+07_VideoMessengerWithStreaming
   uses  haxevideo (written in Haxe and Neko) for rtmp protocol
   flash.media.Video
   flash.media.Microphone
   flash.net.NetConnection
   flash.net.NetStream
-  
-08_OfflineCampfire
-    Windowing API
-    flash.desktop.NativeApplication
-    DockIcon
-    SharedObject
-    
+
 09_PortfolioViewer
   CartesianChart, HLOCChart
   HTTPService
-  
-10_S3Browser
-  flash.filesystem.File.upload
-  HTTPService + REST (list, create, delete)  
-  attachment_fu (S3)
-  
-12_TwitterClient
-  com.adobe.flex.extras.controls.springgraph
-  twitter4r
-  
+
 13_SQLSync
-  
-XX_ChartExplorer
 
-Enjoy,
-
-Daniel and Tony!
+14_ChartExplorer
