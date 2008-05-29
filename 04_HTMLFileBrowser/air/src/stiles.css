@@ -1,5 +1,5 @@
 .folder {
-  font-size: 9pt;
+  font-size: 12pt;
   color: blue;
 }
 
@@ -9,11 +9,11 @@
 }
 
 .normal-file {
-  font-size: 12pt;
+  font-size: 14pt;
   color: green;
 }
 
 .little-file {
-  font-size: 9pt;
+  font-size: 12pt;
   color: black;
 }

@@ -1,6 +1,6 @@
 
 FileBrowserController = function() {
-  this.selectedFile = null;
+  this.selectRootFolder(air.File.userDirectory)
 }
 
 FileBrowserController.prototype.selectRootFolder = function(folder) {
@@ -53,7 +53,7 @@ FileBrowserController.prototype.selectFolder = function(folder, root) {
   }
 }
 
-// called when a label on screen is clicked
+// called when a file or directory label is clicked
 FileBrowserController.prototype.labelClicked = function(node) {
   // get the file's path, stored in the rel attribute of the anchor tag that was clicked
   var file = new air.File(node.currentTarget.rel);
