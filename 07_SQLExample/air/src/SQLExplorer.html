@@ -24,12 +24,13 @@
 </head>
 
 <body onload="init()">
-	<h2 id="statement">SQL Statement</h2>
+	<h2 id="statement">Enter a SQL Statement:</h2>
+	<p>hint: try 'select * from people'</p>
 	<textarea cols="110" rows="10" id="queryText"></textarea>
 	<input type="Button" value="Execute" onclick="controller.executeSQL()" />
 	<br />
 	<div id="resultsContainer">
-		<h2 id="header">SQL Results</h2>
+		<h2 id="header">Statement Results:</h2>
 		<table id="resultsTable" width="100%" border="1" cellspacing="0" cellpadding="4">
 		</table>
 	</div>

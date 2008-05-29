@@ -9,14 +9,21 @@
 	<!-- AIRAliases give API classes and methods an easy to remember prefix: 'air', for instance air.SQLResult -->
 	<script type="text/javascript" src="AIRAliases.js" />
 	<!-- the prototype library has utility methods for working with HTML. It also ships with Rails -->
-	<script type="text/javascript" src="prototype.js" />    
+	<script type="text/javascript" src="prototype.js" />
 	<!-- the logic for the application -->
   	<script type="text/javascript" src="filebrowser_controller.js"></script>
 
   	<link rel="stylesheet" href="stiles.css"></link>
+
+	<script>
+		function init() {
+		  this.controller = new FileBrowserController();
+		}
+	</script>
+
 </head>
 
-<body>
+<body onload="init()">
 
 <h1>File Cloud Browser</h1>
 <!-- Sets the current folder to the user's desktop -->
@@ -35,8 +42,5 @@
     <td width="20%" valign="top"><div id="details"></div></td>
   </tr>
 </table>    
-<script>
-  var controller = new FileBrowserController();
-</script>
 </body>
 </html>

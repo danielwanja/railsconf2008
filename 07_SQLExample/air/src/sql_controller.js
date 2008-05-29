@@ -26,7 +26,6 @@ SQLExplorerController.prototype.executeSQL = function() {
 	this.createStatement($('queryText').value);
 	// execute the current statement
 	this.statement.execute();
-	//$('resultsContainer').hide();
 }
 
 // decides how to format the current results of a sql statement
@@ -70,7 +69,7 @@ SQLExplorerController.prototype.formatSQLResults = function() {
 		td.update('Successful');
 		
 		// show if any rows were affected
-		if (result.rowsAffected) {
+		if (result.rowsAffected != null) {
 			td = new Element('td')
 			tr.insert(td)
 			td.update(result.rowsAffected + ' rows affected')
