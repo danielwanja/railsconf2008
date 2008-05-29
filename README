@@ -1,5 +1,7 @@
 Projects to demonstrate Powering AIR with Rails.
 
+Release under the MIT License (http://www.opensource.org/licenses/mit-license.php). Third party code included may have different/own licenses.
+
 01_AIRBrowser 
   mx:HTML
   dougmccune CoverFlowContainer
