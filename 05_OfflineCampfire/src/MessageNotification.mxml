@@ -57,6 +57,7 @@
 	<mx:Fade id="revealFade" targets="{[this, messageArea, messageText, personText]}" alphaFrom="0" alphaTo=".5" effectEnd="revealComplete()"/>
 	<mx:Fade id="closeFade" targets="{[this, messageArea, messageText, personText]}" alphaFrom="{alpha}" alphaTo="0.0" effectEnd="closeComplete()"/>
 	
+	<!-- FIXME: move all style attributes out to css -->
 	<mx:VBox id="messageArea" cornerRadius="5" borderThickness="1" borderStyle="solid" backgroundColor="0x000000" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
 		<mx:Text id="personText" text="{person} Said:" fontSize="18" fontWeight="bold" color="0xFFFFFF" />
 		<mx:Text

@@ -14,7 +14,7 @@
 	width="100%"
 	height="100%"
 	applicationComplete="setup()"
->
+ viewSourceURL="srcview/index.html">
 
 <mx:Script>
 	<![CDATA[
@@ -41,12 +41,31 @@
 		 */
 		private function setup():void {
 			readPreferences();
-			configureMenus();
 			configureListeners();
+			configureMenus();
 			ping();
 			accountField.setFocus();
 		}
 		
+		/**
+		 * Listen for two events:
+		 * <li />When a network change event occurs, call checkNetwork
+		 * <li />When window recieves focus, call windowActivate on the unreadMessageManager
+		 */ 
+		private function configureListeners():void {
+			NativeApplication.nativeApplication.addEventListener(Event.NETWORK_CHANGE, checkNetwork);
+			NativeApplication.nativeApplication.addEventListener(Event.ACTIVATE, unreadMessageManager.windowActivate);
+		}
+		
+		private function accountSelected():void {
+			account = accountField.text;
+			currentState='accountSelected';
+		}
+		
+//========================================================================
+//  Menu
+//========================================================================
+
 		/**
 		 * Replace system menus with an 'Edit' Menu
 		 * that triggers the settings view 
@@ -71,16 +90,45 @@
 
 		}
 		
-		/**
-		 * Listen for two events:
-		 * <li />When a network change event occurs, call checkNetwork
-		 * <li />When window recieves focus, call windowActivate on the unreadMessageManager
-		 */ 
-		private function configureListeners():void {
-			NativeApplication.nativeApplication.addEventListener(Event.NETWORK_CHANGE, checkNetwork);
-			NativeApplication.nativeApplication.addEventListener(Event.ACTIVATE, unreadMessageManager.windowActivate);
+
+//========================================================================
+//  Preferences
+//========================================================================
+		
+		private function settingsMenuSelected(e:Event):void {
+			showPreferencesEdtor();
 		}
 		
+		private function showPreferencesEdtor():void {
+			if (!showingPreferences) {
+				if (preferencesView == null) {
+					preferencesView = PopUpManager.createPopUp(this, SettingsView, true) as SettingsView;
+					preferencesView.addEventListener('close', hidePreferencesEditor);
+					PopUpManager.centerPopUp(preferencesView);
+				} else {
+					PopUpManager.addPopUp(preferencesView, this, true);
+				}
+				showingPreferences = true;
+			}
+		}
+		
+		private function hidePreferencesEditor(e:Event=null):void {
+			PopUpManager.removePopUp(preferencesView);
+			readPreferences();
+			showingPreferences = false;
+		}
+		
+		private function readPreferences():void {
+			var so:SharedObject = SharedObject.getLocal('air-campfire-prefs');
+			if (so.data['restoreOnMessage'] != null || so.data['growlOnMessage'] != null) {
+				restoreOnMessage = so.data['restoreOnMessage'] as Boolean;
+				growlOnMessage = so.data['growlOnMessage'] as Boolean;
+			}
+		}
+//========================================================================
+//  Messages
+//========================================================================
+
 		/**
 		 * Starts periodically checking for new messages
 		 */
@@ -98,11 +146,6 @@
 			   clearInterval(intervalId)
 			   intervalId = -1;
 			}
-		}
-		
-		private function accountSelected():void {
-			account = accountField.text;
-			currentState='accountSelected';
 		}
 		
 		/**
@@ -172,40 +215,6 @@
 			}
 		}
 		
-//========================================================================
-//  Preferences
-//========================================================================
-		
-		private function settingsMenuSelected(e:Event):void {
-			showPreferencesEdtor();
-		}
-		
-		private function showPreferencesEdtor():void {
-			if (!showingPreferences) {
-				if (preferencesView == null) {
-					preferencesView = PopUpManager.createPopUp(this, SettingsView, true) as SettingsView;
-					preferencesView.addEventListener('close', hidePreferencesEditor);
-					PopUpManager.centerPopUp(preferencesView);
-				} else {
-					PopUpManager.addPopUp(preferencesView, this, true);
-				}
-				showingPreferences = true;
-			}
-		}
-		
-		private function hidePreferencesEditor(e:Event=null):void {
-			PopUpManager.removePopUp(preferencesView);
-			readPreferences();
-			showingPreferences = false;
-		}
-		
-		private function readPreferences():void {
-			var so:SharedObject = SharedObject.getLocal('air-campfire-prefs');
-			if (so.data['restoreOnMessage'] != null || so.data['growlOnMessage'] != null) {
-				restoreOnMessage = so.data['restoreOnMessage'] as Boolean;
-				growlOnMessage = so.data['growlOnMessage'] as Boolean;
-			}
-		}
 		
 //========================================================================
 //  Network
