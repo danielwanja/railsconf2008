@@ -15,7 +15,7 @@
 -->
 
 	<!-- The application identifier string, unique to this application. Required. -->
-	<id>WebSnippet</id>
+	<id>com.flexonrails.railsconf2008.WebSnippet</id>
 
 	<!-- Used as the filename for the application. Required. -->
 	<filename>WebSnippet</filename>

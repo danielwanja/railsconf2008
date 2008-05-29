@@ -8,6 +8,7 @@ package data
 	public class TweetDataAggregator
 	{
 		private var tweets:Array;
+		private var tweetsInTimeRange:Array;
 		private var ids:Object;
 		private var account:String;
 		
@@ -49,6 +50,9 @@ package data
 		public function getTweets():Array {
 			return tweets;
 		}
+		public function getTweetsInTimeRange():Array {
+			return tweetsInTimeRange;
+		}
 		public function setTweets(tweets:Array):void {
 			this.tweets = tweets;
 			aggregate(); // resets ids
@@ -63,10 +67,12 @@ package data
 			}
 		}
 		public function aggregate():void {
+			tweetsInTimeRange = [];
 			var agg:Object = getAggregationStructure();
 			for each (var tweet:Object in tweets) {
 				if (tweet.time_breakdown==null) tweet.time_breakdown = timeBreakdown(tweet.time);
 				if (ids[tweet.id] == null) ids[tweet.id] = tweet;
+				tweetsInTimeRange.push(tweet);
 				increment(agg.tweetsPerDay, tweet.time_breakdown.date);
 				increment(agg.tweetsDayOfWeek, tweet.time_breakdown.w);
 				increment(agg.tweetsDateOfMonth, tweet.time_breakdown.d);
@@ -91,12 +97,14 @@ package data
 			tweetsHourAndDay = new ArrayCollection(mapHourAndDayToArray(agg.tweetsHourAndDay));
 		}
 		
-		//FIXME: refactor with above
+		//FIXME: refactor with above to remove duplicate code.
 		public function aggregateForDateRange(fromDate:Number, toDate:Number):void {
+			tweetsInTimeRange = [];
 			var agg:Object = getAggregationStructure();
 			for each (var tweet:Object in tweets) {
 				if (tweet.time_breakdown==null) tweet.time_breakdown = timeBreakdown(tweet.time);
 				if (tweet.time_breakdown.date<fromDate || tweet.time_breakdown.date>toDate) continue;
+				tweetsInTimeRange.push(tweet);
 				//increment(agg.tweetsPerDay, tweet.time_breakdown.date);
 				increment(agg.tweetsDayOfWeek, tweet.time_breakdown.w);
 				increment(agg.tweetsDateOfMonth, tweet.time_breakdown.d);

@@ -14,7 +14,8 @@ class AssetsController < ApplicationController
   # GET /assets/1.xml
   def show
     @asset = Asset.find(params[:id])
-    redirect_to @asset.authenticated_s3_url
+    redirect_to @asset.attachment_options[:storage] == :s3 ? 
+                  @asset.authenticated_s3_url : @asset.public_filename
   end
 
   # GET /assets/new

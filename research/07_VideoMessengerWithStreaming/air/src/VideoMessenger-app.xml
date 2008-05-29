@@ -15,7 +15,7 @@
 -->
 
 	<!-- The application identifier string, unique to this application. Required. -->
-	<id>com.flexonrails.railsconf.VideoMessengerWithStreaming</id>
+	<id>com.flexonrails.railsconf2008.VideoMessengerWithStreaming</id>
 
 	<!-- Used as the filename for the application. Required. -->
 	<filename>VideoMessenger</filename>

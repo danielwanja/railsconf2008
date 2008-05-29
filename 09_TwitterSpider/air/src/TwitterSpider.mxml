@@ -49,12 +49,17 @@
 		
 		[Bindable]
 		private var tweets:ArrayCollection;
+		[Bindable]
+		private var fromDate:Number;
+		[Bindable]
+		private var toDate:Number;
 		
 		private var dataAggregator:TweetDataAggregator;
 				
 		private function filterByDates(fromDate:Number, toDate:Number):void {
 			dataAggregator.aggregateForDateRange(fromDate, toDate);
-			tweets = new ArrayCollection(dataAggregator.getTweets());
+			tweets = new ArrayCollection(dataAggregator.getTweetsInTimeRange());
+			list.filter();
 		}
 		
 		private function accountSelected(dataAggregator:TweetDataAggregator):void {
@@ -85,21 +90,22 @@
 	<account:AccountList width="230" height="100%"  
 		accountSelected="accountSelected(event.account as TweetDataAggregator);" 
 		loadAccount="loadAccount(event.account as TweetDataAggregator)"/>
-	<mx:TabNavigator id="view" width="100%" height="100%" creationPolicy="all">
-		<data:TwitterSpider id="loader" width="100%"  height="100%" label="Progress" 
-					loaded="accountSelected(loader.dataAggregator)" />
-		<tweetList:TweetList label="Tweets ({tweets.length})" 
-							 tweets="{tweets}"
-							 width="100%" height="100%" />	    					
-		<mx:VBox width="100%" height="100%" label="Stats" creationPolicy="all">
-			<mx:HBox width="100%" height="33%">
-				<charts:ReplyChart id="replyChart" width="50%" height="100%" />
-				<charts:HoursAndDayChart id="hoursAndDayChart" width="50%" height="100%" />			
-			</mx:HBox>
-			<charts:DayWeekMonthBreakdownChart id="dwmChart" width="100%" height="33%" />
-			<charts:ChartSlider id="fullChart" width="100%" height="33%"  dateRangeChanged="filterByDates(event.fromRange, event.toRange)" />		
-		</mx:VBox>
-		
-	</mx:TabNavigator>
+	<mx:VBox width="100%" height="100%">
+		<mx:TabNavigator id="view" width="100%" height="100%" creationPolicy="all">
+			<data:HTMLSpider id="loader" width="100%"  height="100%" label="Progress" 
+						loaded="accountSelected(loader.dataAggregator)" />
+			<tweetList:TweetList id="list" label="Tweets ({tweets.length})" 
+								 tweets="{tweets}"
+								 width="100%" height="100%" />	    					
+			<mx:VBox width="100%" height="100%" label="Stats" creationPolicy="all">
+				<mx:HBox width="100%" height="33%">
+					<charts:ReplyChart id="replyChart" width="50%" height="100%" />
+					<charts:HoursAndDayChart id="hoursAndDayChart" width="50%" height="100%" />			
+				</mx:HBox>
+				<charts:DayWeekMonthBreakdownChart id="dwmChart" width="100%" height="33%" />
+			</mx:VBox>		
+		</mx:TabNavigator>
+		<charts:ChartSlider id="fullChart" width="100%" height="33%"  dateRangeChanged="filterByDates(event.fromRange, event.toRange)" />				
+	</mx:VBox>	
 </mx:HDividedBox>
 </mx:WindowedApplication>

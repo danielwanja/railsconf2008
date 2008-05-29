@@ -15,10 +15,10 @@
 -->
 
 	<!-- The application identifier string, unique to this application. Required. -->
-	<id>main-simple</id>
+	<id>com.flexonrails.railsconf2008.AIRBrowserSimple</id>
 
 	<!-- Used as the filename for the application. Required. -->
-	<filename>main_simple</filename>
+	<filename>AIRBrowserSimple</filename>
 
 	<!-- The name that is displayed in the AIR application installer. Optional. -->
 	<name>main_simple</name>

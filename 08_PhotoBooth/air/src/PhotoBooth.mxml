@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
 	applicationComplete="insertWebcamVideo();"
-	>
+	 width="690" height="720"
+	 verticalScrollPolicy="off" horizontalScrollPolicy="off">
 <mx:Script>
 	<![CDATA[
 	import mx.graphics.codec.PNGEncoder;

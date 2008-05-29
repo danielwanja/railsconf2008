@@ -19,8 +19,6 @@
 		}
 		
 		private function dateLabel(item:Object, col:DataGridColumn):String {
-			var d = item.time_breakdown.dateandtime;
-			var e = dtFormatter.format(item.time_breakdown.dateandtime)
 			return item.time_breakdown ? dtFormatter.format(item.time_breakdown.dateandtime) : "";
 		}
 	]]>
