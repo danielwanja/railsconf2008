@@ -15,7 +15,7 @@
 -->
 
 	<!-- The application identifier string, unique to this application. Required. -->
-	<id>com.flexonrails.PortfolioViewer</id>
+	<id>com.flexonrails.railsconf2008.PortfolioViewer</id>
 
 	<!-- Used as the filename for the application. Required. -->
 	<filename>PortfolioViewer</filename>

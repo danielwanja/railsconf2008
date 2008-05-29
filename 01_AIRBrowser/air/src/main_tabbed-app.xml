@@ -15,10 +15,10 @@
 -->
 
 	<!-- The application identifier string, unique to this application. Required. -->
-	<id>main-tabbed</id>
+	<id>com.flexonrails.railsconf2008.AIRBrowserTabbed</id>
 
 	<!-- Used as the filename for the application. Required. -->
-	<filename>main_tabbed</filename>
+	<filename>AIRBrowserTabbed</filename>
 
 	<!-- The name that is displayed in the AIR application installer. Optional. -->
 	<name>main_tabbed</name>
