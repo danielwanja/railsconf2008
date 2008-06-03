@@ -56,7 +56,7 @@ package data
 		
 		static public function remove(aggregator:TweetDataAggregator):void {
 			var file:File = File.documentsDirectory;
-			file = file.resolvePath("TwitterSucker/"+aggregator.accountName+".dat");
+			file = file.resolvePath("TwitterSpider/"+aggregator.accountName+".dat");
 			file.deleteFile();
 		}		
 	}
