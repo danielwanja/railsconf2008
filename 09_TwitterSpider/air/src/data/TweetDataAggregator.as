@@ -1,6 +1,7 @@
 package data
 {
 	import mx.collections.ArrayCollection;
+	import mx.utils.ObjectUtil;
 	
 	/**
 	 * Incrementally sumarize tweets
@@ -9,6 +10,7 @@ package data
 	{
 		private var tweets:Array;
 		private var tweetsInTimeRange:Array;
+		private var dateRange:Object; 
 		private var ids:Object;
 		private var account:String;
 		
@@ -95,10 +97,28 @@ package data
 			tweetsByHour = new ArrayCollection(mapToArray(agg.tweetsByHour));
 			tweetsReplies = new ArrayCollection(mapToArray(agg.tweetsReplies, true, 'value', Array.DESCENDING||Array.NUMERIC, 10));
 			tweetsHourAndDay = new ArrayCollection(mapHourAndDayToArray(agg.tweetsHourAndDay));
+			// Sort
+			//this.tweets.sortOn('time', Array.NUMERIC);
+			this.tweets.sort(tweetDateCompare);
+			dateRange = getFullDateRange();
+		}
+		private function tweetDateCompare(t0:Object, t1:Object):Number {
+			return ObjectUtil.numericCompare(t1.time_breakdown.date, t0.time_breakdown.date);
+		}
+		
+		public function getFullDateRange():Object {
+			//FIXME: that doesn't work...!
+			//FIXME: add support for zero tweets.
+			return {fromDate:tweets[0].time_breakdown.date, 
+				   toDate:tweets[tweets.length-1].time_breakdown.date}
+		}
+		public function getDateRange():Object {
+			return dateRange;
 		}
 		
 		//FIXME: refactor with above to remove duplicate code.
 		public function aggregateForDateRange(fromDate:Number, toDate:Number):void {
+			dateRange = {fromDate:fromDate, toDate:toDate};
 			tweetsInTimeRange = [];
 			var agg:Object = getAggregationStructure();
 			for each (var tweet:Object in tweets) {
@@ -174,7 +194,7 @@ package data
 			var dt:Date = new Date(y,m-1,d);
 			var dateAndTime:Date = new Date(y,m-1,d, h, parts[4], parts[5]);
 			var w:Number = dt.getDay();
-			return {dateandtime:dateAndTime, date:dt.time, y:y, m:m, d:d, h:h, w:w}
+			return {dateandtime:dateAndTime, date:dt.getTime(), y:y, m:m, d:d, h:h, w:w}
 		}
 	}
 }

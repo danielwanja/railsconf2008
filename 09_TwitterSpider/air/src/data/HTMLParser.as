@@ -22,7 +22,7 @@ package data
 		}
 		
 		public function get updates():Number {
-			return Number(stats.children()[3].span.toString().replace(',',''));
+			return Number(stats.span.(@id=="update_count").toString().replace(',',''));
 		}
 		public function get pageCount():Number {
 			return Math.ceil(updates/20);
@@ -36,6 +36,8 @@ package data
 		
 		/**
 		 * Converts these
+		 * <span id="update_count" class="stats_count numeric">1,393</span>
+		 * 
 		 * <ul class="stats">
 		 * <li><a class="label" href="/Scobleizer/friends">Following</a> <span class="numeric stats_count">21,164</span></li>
     	 * <li><a class="label" href="/Scobleizer/followers">Followers</a><span class="stats_count numeric">23,874</span></li>
@@ -45,19 +47,27 @@ package data
 		 */
 		public function get stats():XML {
 			if (_stats != null) return _stats;
-			_stats = partial('<ul class="stats">', '</ul>')
+			var following:XML =  partial('<span id="following_count" class="stats_count numeric">', '</span>');
+			var followers:XML =  partial('<span id="follower_count" class="stats_count numeric">', '</span>');
+			var updates:XML =  partial('<span id="update_count" class="stats_count numeric">', '</span>'); 
+			_stats = <stats/>
+			_stats.appendChild(following);
+			_stats.appendChild(followers);
+			_stats.appendChild(updates);
 			return _stats;
 		}
 		
 		public function get tweets():XML {
 			if (_tweets != null) return _tweets;
-			_tweets = partial('<table class="doing" id="timeline" cellspacing="0">', '</table>');
+			_tweets = partial('<tbody id="timeline_body">', '</tbody>');
 			return _tweets;
 		}
 		
 		public function get ids():Array {
 			if (_ids != null) return _ids;
-			var list:XMLList = tweets.tr.(attribute('class')=='hentry'||attribute('class')=='hentry_over').@id;
+			//FIXME: check if ||attribute('class'=='hentry latest-status' is also required
+			var a = tweets;
+			var list:XMLList = tweets.tr.(attribute('class')=='hentry status latest-status'||attribute('class')=='hentry status').@id;
 			var result:Array = [];
 			for each (var xml:XML in list) {
 				result.push(Number(xml.toString().replace("status_", "")));
@@ -75,12 +85,15 @@ package data
 		  </tr>
 		*/
 		public function get tweetsContent():XMLList {
-			var list:XMLList = tweets.tr.td.(attribute('class')=='content');
+			var tbody:XML = tweets;
+//			var list:XMLList = tbody.tr.td.div.(attribute('class')=='status-body');
+			var list:XMLList = tbody.tr.td.(attribute('class')=='status-body').div;
+//			var list:XMLList = tbody.tr.(attribute('class')=='hentry status latest-status'||attribute('class')=='hentry status')
 			return list;
 		}
 		
 		/**
-		 * Convert list of td into array of stat objects
+		 * Convert list of tr into array of stat objects
 		 */		
 		public function get tweetsArray():Array {
 			var list:XMLList = tweetsContent;
@@ -98,6 +111,16 @@ package data
 		/**
 		 * Extracting message, published_time
 		 * returns {message, time, time_breakdown:{y, m, d, h}, client, in_reply_to, 
+		 * <tr id="status_870589015" class="hentry">
+			<td>
+				<div class="status-body">
+					<span class="entry-content"> iPhone restored. But I'm a wreck. Back to bed. </span>
+					<span class="meta entry-meta">
+					</span>
+				</div>
+			</td>
+			 ...
+		 * OLD:
 		 * <td class="content">
 			  <span class="entry-content">
 			    @
@@ -129,14 +152,14 @@ package data
 					from = entryMetaChildren[2].toString()
 					respondsToIndex = 3
 			} else {
-					from = entryMetaChildren[1].toString().replace("from ","");
+					from = entryMetaChildren[1].toString().replace("from","");
 			}
 			if (respondsToIndex<entryMetaChildren.length()) {
 				respondsTo = entryMetaChildren[respondsToIndex].toString().replace("in reply to ","");
 			}
 			return {
 				message: content.span.(attribute('class')=='entry-content').toString(),
-				time:entryMeta.a.abbr.@title,
+				time:entryMeta.a.span.(attribute('class')=='published').@title,
 				time_breakdown:null,
 				client: from,
 				in_reply_to: respondsTo

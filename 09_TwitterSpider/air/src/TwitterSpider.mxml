@@ -4,6 +4,8 @@
 	Then provides stats
 	
 	Todo:
+		Architecture:
+			refactor to Cairngorm				
 		Application
 			display loading at startup
 		TwitterSpider
@@ -41,7 +43,10 @@
 	xmlns:data="data.*" 
 	xmlns:account="account.*"
 	xmlns:tweetList="tweetList.*"
-	layout="vertical" xmlns:local="*">
+	xmlns:local="*"	
+	backgroundGradientColors="[#ffffff, #ffffff]"
+	layout="vertical">
+	<mx:Style source="style/yflexskin.css"/>
 <mx:Script>
 	<![CDATA[
 		import data.TweetDataAggregator;
@@ -57,11 +62,52 @@
 		private var dataAggregator:TweetDataAggregator;
 				
 		private function filterByDates(fromDate:Number, toDate:Number):void {
+			this.fromDate = fromDate;
+			this.toDate = toDate;
 			dataAggregator.aggregateForDateRange(fromDate, toDate);
 			tweets = new ArrayCollection(dataAggregator.getTweetsInTimeRange());
 			list.filter();
 		}
 		
+		private function showFullRange():void {
+	        var dateRange:Object = dataAggregator.getFullDateRange(); 
+			filterByDates(dateRange.fromDate, dateRange.toDate);
+			fullChart.fullDateRange()
+		}
+		
+		static private const MILLIS_TO_DAY:Number = 1000*60*60*24;
+		private function showOneMonth():void {
+	        var dateRange:Object = dataAggregator.getFullDateRange(); 
+	        var spreadDays:Number = (dateRange.toDate - dateRange.fromDate)/MILLIS_TO_DAY;
+	        dateRange.fromDate = dateRange.toDate - ((spreadDays>30) ? 30*MILLIS_TO_DAY : spreadDays*MILLIS_TO_DAY);
+			filterByDates(dateRange.fromDate, dateRange.toDate);
+			fullChart.setFromDate(dateRange.fromDate); 
+		}
+		
+		private function showOneWeek():void {
+	        var dateRange:Object = dataAggregator.getDateRange(); 
+	        var spreadDays:Number = (dateRange.toDate - dateRange.fromDate)/MILLIS_TO_DAY;
+	        dateRange.fromDate = dateRange.toDate - ((spreadDays>7) ? 7*MILLIS_TO_DAY : spreadDays*MILLIS_TO_DAY);
+			filterByDates(dateRange.fromDate, dateRange.toDate);
+			fullChart.setFromDate(dateRange.fromDate); 
+		}
+		private function changeDateRange(range:String):void {
+			if (dataAggregator==null) return;
+			//TODO: implement smart range fixes...i.e. 
+			//       if fromDate can be moved back then move it back for range
+			//	     if toDate needs to be moved forward, do it 
+			//		 if too small...do what you can (i.e. only 20 days there, the show 20 for month)
+			switch(range) {
+				case "Full"  : showFullRange(); 
+							   break;
+				case "Month" : showOneMonth();
+							   break;						
+				case "Week"  : showOneWeek();
+				               break;
+			}
+		}
+		
+		// FIXME: similar to full range...merge
 		private function accountSelected(dataAggregator:TweetDataAggregator):void {
 			if (view.selectedIndex==0) view.selectedIndex=2;
 			this.dataAggregator = dataAggregator;
@@ -84,28 +130,48 @@
 			loader.load(dataAggregator);
 		}			
 		
+		private function formatDate(date:Number):String {
+			return dateFormatter.format(new Date(date));
+		}
 	]]>
 </mx:Script>
+<mx:DateFormatter id="dateFormatter" formatString="MMM.DD.YY" />
 <mx:HDividedBox width="100%" height="100%">
-	<account:AccountList width="230" height="100%"  
+	<account:AccountList
+		id="accountList"
+		width="230" height="100%"  
 		accountSelected="accountSelected(event.account as TweetDataAggregator);" 
 		loadAccount="loadAccount(event.account as TweetDataAggregator)"/>
 	<mx:VBox width="100%" height="100%">
+		<mx:HBox width="100%" horizontalAlign="center">
+			<mx:Label text="{accountList.selectedAccountName} {formatDate(fromDate)}-{formatDate(toDate)}" 
+				width="100%" fontWeight="bold" textAlign="center" fontSize="22"/>
+			<mx:Label text="Range:"  />
+			<mx:ToggleButtonBar itemClick="changeDateRange(event.label)" >
+				<mx:dataProvider>
+					<mx:String>Full</mx:String>
+					<mx:String>Month</mx:String>
+					<mx:String>Week</mx:String>
+				</mx:dataProvider>
+			</mx:ToggleButtonBar>			
+		</mx:HBox>
 		<mx:TabNavigator id="view" width="100%" height="100%" creationPolicy="all">
 			<data:HTMLSpider id="loader" width="100%"  height="100%" label="Progress" 
 						loaded="accountSelected(loader.dataAggregator)" />
 			<tweetList:TweetList id="list" label="Tweets ({tweets.length})" 
 								 tweets="{tweets}"
-								 width="100%" height="100%" />	    					
+								 width="100%" height="100%" />
 			<mx:VBox width="100%" height="100%" label="Stats" creationPolicy="all">
-				<mx:HBox width="100%" height="33%">
+				<mx:HBox width="100%" height="50%">
 					<charts:ReplyChart id="replyChart" width="50%" height="100%" />
 					<charts:HoursAndDayChart id="hoursAndDayChart" width="50%" height="100%" />			
 				</mx:HBox>
-				<charts:DayWeekMonthBreakdownChart id="dwmChart" width="100%" height="33%" />
+				<charts:DayWeekMonthBreakdownChart id="dwmChart" width="100%" height="50%" />
 			</mx:VBox>		
 		</mx:TabNavigator>
-		<charts:ChartSlider id="fullChart" width="100%" height="33%"  dateRangeChanged="filterByDates(event.fromRange, event.toRange)" />				
+		<charts:DateRange id="fullChart" width="100%" height="33%"  
+			dateRangeChanged="filterByDates(event.fromRange, event.toRange)" />				
 	</mx:VBox>	
 </mx:HDividedBox>
 </mx:WindowedApplication>
+

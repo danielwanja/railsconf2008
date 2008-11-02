@@ -30,6 +30,11 @@
 		private function formatTweetCountLabel(item:Object, column:DataGridColumn):String {
 			return item.aggregation.getTweets().length;
 		}
+		
+		[Bindable(event="accountSelected")]
+		public function get selectedAccountName():String {
+			return grid.selectedItem.aggregation.accountName;
+		}
 		private function accountSelected():void {
 		   var event:AccountEvent = new AccountEvent("accountSelected");
 		   event.account = 	grid.selectedItem.aggregation;

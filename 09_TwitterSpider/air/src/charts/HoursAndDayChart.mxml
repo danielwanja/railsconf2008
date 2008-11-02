@@ -40,7 +40,7 @@
 	        </mx:verticalAxisRenderers>
 	    
 	        <mx:series>
-	            <mx:BubbleSeries yField="w" xField="h" radiusField="count"  showDataEffect="{interpolateIn}" />
+	            <mx:BubbleSeries yField="w" xField="h" radiusField="count"  /> <!-- showDataEffect="{interpolateIn}" /> -->
 	        </mx:series>
 	        
 	    </mx:BubbleChart>			

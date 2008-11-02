@@ -21,14 +21,22 @@
 		private function dateLabel(item:Object, col:DataGridColumn):String {
 			return item.time_breakdown ? dtFormatter.format(item.time_breakdown.dateandtime) : "";
 		}
+		//FIXME: this is ridiculus...make simpler
+		private function sortDate(o1:Object, o2:Object):int {
+			var d1:int = o1&&o1.time_breakdown ? o1.time_breakdown.dateandtime.time : 0;
+			var d2:int = o2&&o2.time_breakdown ? o2.time_breakdown.dateandtime.time : 0
+			return d1<d2?-1:(d1>d2?1:0);
+		}
 	]]>
 </mx:Script>	
 	<mx:TextInput id="search" change="filter()" />
 	<mx:DateFormatter id="dtFormatter"  formatString="MMM.DD.YY HH:NN:SS" />
 	<mx:DataGrid width="100%" height="100%" dataProvider="{tweets}" rowHeight="30"> 
 		<mx:columns>
-			<mx:DataGridColumn headerText="Time" labelFunction="dateLabel" />
-			<mx:DataGridColumn headerText="Message" dataField="message" width="750"  >
+			<mx:DataGridColumn headerText="Time" 
+							   labelFunction="dateLabel"  
+							   />
+			<mx:DataGridColumn headerText="Message"  width="750"  >
 					<mx:itemRenderer>
 						<mx:Component>
 							<mx:HTML htmlText="{data.message}" horizontalScrollPolicy="off" 
@@ -36,7 +44,14 @@
 						</mx:Component>
 					</mx:itemRenderer>						
 			</mx:DataGridColumn>
-			<mx:DataGridColumn headerText="Client" dataField="client"/>
+			<mx:DataGridColumn headerText="Client" dataField="client">
+					<mx:itemRenderer>
+						<mx:Component>
+							<mx:HTML htmlText="{data.client}" horizontalScrollPolicy="off" 
+									paintsDefaultBackground="false" backgroundAlpha="0"/>
+						</mx:Component>
+					</mx:itemRenderer>										
+			</mx:DataGridColumn>
 			<mx:DataGridColumn headerText="In Reply" dataField="in_reply_to"/>
 		</mx:columns>
 	</mx:DataGrid>
